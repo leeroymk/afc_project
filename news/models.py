@@ -1,19 +1,13 @@
-from sqlalchemy import Column, Integer, String
-from .db import Base, engine
+from django.db import models
 
 
-class News(Base):
-    __tablename__ = 'news'
-    id = Column(Integer, primary_key=True)
+class News(models.Model):
     # TODO: change date type from str to datetime
-    date = Column(String)
-    news_title = Column(String)
-    news_context = Column(String)
-    news_source = Column(String)
+    # TODO: fix max lengths
+    news_date = models.CharField(max_length=10)
+    news_title = models.CharField(max_length=100)
+    news_context = models.CharField(max_length=200)
+    news_source = models.CharField(max_length=30)
 
-    def __repr__(self):
-        return f'<News: {self.news_title} from  {self.news_source}>'
-
-
-if __name__ == "__main__":
-    Base.metadata.create_all(bind=engine)
+    def __str__(self):
+        return f'<News: {self.news_title} from {self.news_source}>'

@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from .get_news import news_all
-
-# news = '\n'.join(f"id: {one_news.id}, Дата: {one_news.date}, Новость: {one_news.news_title}, Источник: {one_news.news_source}" for one_news in news_all)
-# print(news)
+from .models import News
 
 news = []
-for one_news in news_all:
-    news.append(f"id: {one_news.id}, Дата: {one_news.date}, Новость: {one_news.news_title}, Источник: {one_news.news_source}")
+
+for one_news in News.objects.all():
+    news.append(
+        f"id: {one_news.id}, date: {one_news.news_date}, title: {one_news.news_title}, context: {one_news.news_context}, source: {one_news.news_source}")
+
 
 def home(request):
     context = {
