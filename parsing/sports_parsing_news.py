@@ -1,9 +1,11 @@
+from pprint import pprint
 import requests
 import lxml
 from bs4 import BeautifulSoup
 from random import choice
 
 
+# Проверяем URL на возможность соединения
 def get_html(url):
     try:
         result = requests.get(url, headers=random_headers())
@@ -14,34 +16,7 @@ def get_html(url):
         return False
 
 
-def get_team_news(club_link):
-    club_src = requests.get(club_link, headers=random_headers())
-    # Тут возможно нужна проверка raise_for_status()
-    soup = BeautifulSoup(club_src.text, 'lxml')
-    short_news = soup.find_all(class_='b-tag-lenta__item-news-item')
-    bold_news = soup.find_all(class_='b-tag-lenta__item-body')
-    result_news = []
-    for snew in short_news:
-        try:
-            title = snew.find('h2').text
-            url = snew.find('a')['href']
-        except (TypeError, AttributeError) as er:
-            print(f'Something wrong here: {er}')
-            continue
-        result_news.append({
-            'title': title,
-            'url': url,
-            })
-    for bnew in bold_news:
-        title = bnew.find('h2').text
-        url = bnew.find('a')['href']
-        result_news.append({
-            'title': title,
-            'url': url,
-        })
-    return result_news
-
-
+# Получаем список команд лиги
 def get_teams_list(src):
     soup = BeautifulSoup(src, 'lxml')
     teams_list = soup.find_all(class_='b-tag-table__content-team')
@@ -61,12 +36,56 @@ def get_teams_list(src):
         teams_data.update(
             {
                 team_name: {
+                    # Парсим новости каждой команды
                     'club_news': get_team_news(teams_data[team_name]['url'])
                 }
             }
         )
 
-    return print('Done!')
+    return print('Парсинг завершился успешно!')
+
+
+# Сам процесс парсинга
+def get_team_news(club_link):
+    club_src = requests.get(club_link, headers=random_headers())
+    # Тут возможно нужна проверка raise_for_status()
+    soup = BeautifulSoup(club_src.text, 'lxml')
+    result_news = []
+
+    blog_news = soup.find_all(class_='b-tag-lenta__item m-type_blog')
+    for bnew in blog_news:
+        time_news = ''.join(
+            bnew.find(class_='b-tag-lenta__item-details').text).strip()
+        title = bnew.find('h2').text
+        url = bnew.find('a')['href']
+        result_news.append(
+            {
+                'time': time_news,
+                'title': title,
+                'url': url,
+            })
+
+    short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
+    for snew in short_news:
+        time_date = ''.join(
+            snew.find(class_='b-tag-lenta__item-details').text).strip()
+        time_hours = snew.find_all(class_='b-tag-lenta__item-news-item')
+        for element in time_hours:
+            exact_time = element.find('time').text
+            news_exact_time = f'{time_date}, {exact_time}'
+            title = element.find('h2').text
+            url = element.find('a')['href']
+            result_news.append(
+                {
+                    'time': news_exact_time,
+                    'title': title,
+                    'url': url
+                    }
+            )
+    pprint(result_news)
+    return result_news
+
+
 
 
 if __name__ == "__main__":
@@ -92,4 +111,4 @@ if __name__ == "__main__":
     if html:
         get_teams_list(html)
     else:
-        print('Wrong way')
+        print('Что-то пошло не по плану...')
