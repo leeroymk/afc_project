@@ -1,6 +1,7 @@
 import logging
 import requests
 from random import choice
+from news.models import News
 
 import lxml
 from selenium import webdriver
@@ -87,6 +88,10 @@ def get_team_news(scrolled_page):
                     'url': url,
                     }
             )
+#__________________________________________________________________________________
+            n = News(news_date=news_exact_time, news_title=title, news_source=url)
+            n.save()
+# __________________________________________________________________________________
     return parsed_news
 
 

@@ -8,8 +8,8 @@ for one_news in News.objects.all():
         f"id: {one_news.id}, date: {one_news.news_date}, title: {one_news.news_title}, context: {one_news.news_context}, source: {one_news.news_source}")
 
 
-def home(request):
+def index(request):
     context = {
         'news': news
     }
-    return render(request, 'news/home.html', context)
+    return render(request, 'news/index.html', context)
