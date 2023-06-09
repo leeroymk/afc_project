@@ -1,15 +1,9 @@
 from django.shortcuts import render
 from .models import News
 
-news = []
-
-for one_news in News.objects.all():
-    news.append(
-        f"id: {one_news.id}, date: {one_news.news_date}, title: {one_news.news_title}, context: {one_news.news_context}, source: {one_news.news_source}")
-
 
 def index(request):
     context = {
-        'news': news
+        'news': News.objects.all()
     }
     return render(request, 'news/index.html', context)

@@ -89,7 +89,7 @@ def get_team_news(scrolled_page):
                     }
             )
 #__________________________________________________________________________________
-            n = News(news_date=news_exact_time, news_title=title, news_source=url)
+            n = News(date=news_exact_time, title=title, source=url)
             n.save()
 # __________________________________________________________________________________
     return parsed_news
