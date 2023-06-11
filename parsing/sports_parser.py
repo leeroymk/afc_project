@@ -1,7 +1,8 @@
 import logging
+import sys
 import requests
 from random import choice
-from news.models import News
+# from news.models import News
 
 import lxml
 from selenium import webdriver
@@ -12,8 +13,17 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 
 
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
+
+
 # Проверяем URL на возможность соединения
-def get_html(url):
+def get_start_page_html(url):
     try:
         result = requests.get(url, headers=random_headers())
         result.raise_for_status()
@@ -89,8 +99,8 @@ def get_team_news(scrolled_page):
                     }
             )
 #__________________________________________________________________________________
-            n = News(date=news_exact_time, title=title, source=url)
-            n.save()
+            # n = News(date=news_exact_time, title=title, source=url)
+            # n.save()
 # __________________________________________________________________________________
     return parsed_news
 
@@ -147,7 +157,7 @@ if __name__ == "__main__":
     teams_data = {}
 
     teams_table = 'https://m.sports.ru/epl/table/'
-    html = get_html(teams_table)
+    html = get_start_page_html(teams_table)
     if html:
         for team in get_teams_list(html):
             team_name = team.find('a').text
