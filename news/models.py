@@ -3,7 +3,7 @@ from django.db import models
 
 class News(models.Model):
     # TODO: change date type from str to datetime
-    date = models.CharField(max_length=50)
+    date = models.DateTimeField()
     title = models.CharField(max_length=200)
     source = models.URLField(max_length=200)
 

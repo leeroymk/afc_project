@@ -3,6 +3,7 @@ import logging
 import requests
 from random import choice
 from news.models import News
+from datetime import datetime, timedelta
 
 import lxml
 from selenium import webdriver
@@ -18,6 +19,36 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write("Test")
+        
+        def timetyper(parsed):
+            parsed = parsed.lower()
+            if parsed[:7] == 'сегодня' or parsed.split()[-1] == 'назад':
+                return datetime.now()
+            elif parsed[:5] == 'вчера':
+                return datetime.now() - timedelta(days=1)
+            else:
+                mdict = {
+                    'янв': '01',
+                    'фев': '02',
+                    'мар': '03',
+                    'апр': '04',
+                    'май': '05',
+                    'июн': '06',
+                    'июл': '07',
+                    'авг': '08',
+                    'сен': '09',
+                    'окт': '10',
+                    'ноя': '11',
+                    'дек': '12'
+                }
+
+                d = f'0{parsed.split()[0]}'[-2:]
+                m = mdict[parsed.split()[1][:3]]
+                y = datetime.now().year
+                t = parsed.split()[-1]
+
+                return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
+            
 
         # Проверяем URL на возможность соединения
         def get_html(url):
@@ -75,6 +106,12 @@ class Command(BaseCommand):
                         'title': title,
                         'url': url,
                     })
+                print(time_news)
+# __________________________________________________________________________________
+                if not News.objects.filter(source=url):
+                    n = News(date=timetyper(time_news), title=title, source=url)
+                    n.save()
+# __________________________________________________________________________________
             short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
             for snew in short_news:
                 time_date = ''.join(
@@ -92,10 +129,12 @@ class Command(BaseCommand):
                             'url': url,
                         }
                     )
-                    # __________________________________________________________________________________
-                    n = News(date=news_exact_time, title=title, source=url)
-                    n.save()
-            # __________________________________________________________________________________
+                    print(exact_time)
+# __________________________________________________________________________________
+                    if not News.objects.filter(source=url):
+                        n = News(date=timetyper(news_exact_time), title=title, source=url)
+                        n.save()
+# __________________________________________________________________________________
             return parsed_news
 
         logging.basicConfig(level=logging.INFO,
