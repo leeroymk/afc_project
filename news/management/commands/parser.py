@@ -1,8 +1,7 @@
-from django.core.management.base import BaseCommand, CommandError
 import logging
+import sys
 import requests
 from random import choice
-from news.models import News
 from datetime import datetime, timedelta
 
 import lxml
@@ -12,20 +11,35 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+from django.core.management.base import BaseCommand, CommandError
+
+from news.models import News
 
 
 class Command(BaseCommand):
     help = 'Parse news'
 
     def handle(self, *args, **options):
-        self.stdout.write("Test")
-        
+        # root = logging.getLogger()
+        # root.setLevel(logging.DEBUG)
+        # handler = logging.StreamHandler(sys.stdout)
+        # handler.setLevel(logging.DEBUG)
+        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # handler.setFormatter(formatter)
+        # root.addHandler(handler)
+
         def timetyper(parsed):
             parsed = parsed.lower()
-            if parsed[:7] == 'сегодня' or parsed.split()[-1] == 'назад':
-                return datetime.now()
-            elif parsed[:5] == 'вчера':
-                return datetime.now() - timedelta(days=1)
+            if 'назад' in parsed:
+                return datetime.now() - timedelta(minutes=int(parsed.split()[0]))
+            elif 'сегодня' in parsed:
+                d = datetime.now().day
+                m = datetime.now().month
+                y = datetime.now().year
+            elif 'вчера' in parsed:
+                d = (datetime.now() - timedelta(days=1)).day
+                m = (datetime.now() - timedelta(days=1)).month
+                y = (datetime.now() - timedelta(days=1)).year
             else:
                 mdict = {
                     'янв': '01',
@@ -33,6 +47,7 @@ class Command(BaseCommand):
                     'мар': '03',
                     'апр': '04',
                     'май': '05',
+                    'мая': '05',
                     'июн': '06',
                     'июл': '07',
                     'авг': '08',
@@ -45,13 +60,13 @@ class Command(BaseCommand):
                 d = f'0{parsed.split()[0]}'[-2:]
                 m = mdict[parsed.split()[1][:3]]
                 y = datetime.now().year
-                t = parsed.split()[-1]
 
-                return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
-            
+            t = parsed.split()[-1]
+
+            return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
 
         # Проверяем URL на возможность соединения
-        def get_html(url):
+        def get_start_page_html(url):
             try:
                 result = requests.get(url, headers=random_headers())
                 result.raise_for_status()
@@ -76,7 +91,7 @@ class Command(BaseCommand):
             return teams_list
 
         # Скроллим страницу
-        def selenium_scroller(url):
+        def selenium_scroller(url, team_name):
             browser.get(url)
             try:
                 # Здесь настраиваем количество страниц прокрутки
@@ -88,10 +103,10 @@ class Command(BaseCommand):
                 print(f'Ошибка {er} при парсинге {url}')
             finally:
                 # Передаем в парсер новостей прокрученную страницу
-                return get_team_news(browser.page_source)
+                return get_team_news(browser.page_source, team_name)
 
         # Процесс парсинга новостей
-        def get_team_news(scrolled_page):
+        def get_team_news(scrolled_page, team_name):
             soup = BeautifulSoup(scrolled_page, 'lxml')
             parsed_news = []
             blog_news = soup.find_all(class_='b-tag-lenta__item m-type_blog')
@@ -106,12 +121,13 @@ class Command(BaseCommand):
                         'title': title,
                         'url': url,
                     })
-                print(time_news)
-# __________________________________________________________________________________
+                if title is None:
+                    self.stdout.write(f'Title is None. Url: {url}\n')
+                    continue
                 if not News.objects.filter(source=url):
-                    n = News(date=timetyper(time_news), title=title, source=url)
+                    self.stdout.write(f'Adding: {time_news}, {title}\n')
+                    n = News(date=timetyper(time_news), team=team_name, title=title, source=url)
                     n.save()
-# __________________________________________________________________________________
             short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
             for snew in short_news:
                 time_date = ''.join(
@@ -129,12 +145,13 @@ class Command(BaseCommand):
                             'url': url,
                         }
                     )
-                    print(exact_time)
-# __________________________________________________________________________________
+                    if title is None:
+                        self.stdout.write(f'Title is None. Url: {url}\n')
+                        continue
                     if not News.objects.filter(source=url):
-                        n = News(date=timetyper(news_exact_time), title=title, source=url)
+                        self.stdout.write(f'Adding: {news_exact_time}, {title}\n')
+                        n = News(date=timetyper(news_exact_time), team=team_name, title=title, source=url)
                         n.save()
-# __________________________________________________________________________________
             return parsed_news
 
         logging.basicConfig(level=logging.INFO,
@@ -187,14 +204,14 @@ class Command(BaseCommand):
         teams_data = {}
 
         teams_table = 'https://m.sports.ru/epl/table/'
-        html = get_html(teams_table)
+        html = get_start_page_html(teams_table)
         if html:
             for team in get_teams_list(html):
                 team_name = team.find('a').text
                 teams_data.update(
                     {
                         # Парсим новости каждой команды (передаем URL в скроллер)
-                        team_name: selenium_scroller(teams_data[team_name]['url'])
+                        team_name: selenium_scroller(teams_data[team_name]['url'], team_name)
                     }
                 )
         else:
