@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 import lxml
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -22,7 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         root = logging.getLogger()
-        root.setLevel(logging.DEBUG)
+        root.setLevel(logging.INFO)
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
@@ -35,11 +36,6 @@ class Command(BaseCommand):
                             format="[%(asctime)s] %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
                             datefmt='%H:%M:%S',
                             )
-        logging.debug("DEBUG Message")
-        logging.info("INFO")
-        logging.warning("WARNING")
-        logging.error("ERROR")
-        logging.critical("Message of CRITICAL severity")
 
         def timetyper(parsed):
             parsed = parsed.lower()
@@ -85,7 +81,7 @@ class Command(BaseCommand):
                 result.raise_for_status()
                 return result.text
             except (requests.RequestException, ValueError):
-                logging.ERROR('Сетевая ошибка')
+                logging.error('Сетевая ошибка')
                 return False
 
         # Получаем список команд лиги и ссылки
@@ -108,29 +104,34 @@ class Command(BaseCommand):
                     more_btn = browser.find_element(By.XPATH, btn_xpath)
                     browser.execute_script("arguments[0].click();", more_btn)
             except (requests.RequestException, ValueError) as er:
-                logging.ERROR(f'Ошибка {er} при парсинге {team_url}')
+                logging.error(f'Ошибка {er} при парсинге {team_url}')
             finally:
                 # Передаем в парсер новостей прокрученную страницу
-                return get_team_news(browser.page_source, team_name)
+                get_team_news(browser.page_source, team_name)
 
         # Процесс парсинга новостей
         def get_team_news(scrolled_page, team_name):
             soup = BeautifulSoup(scrolled_page, 'lxml')
             blog_news = soup.find_all(class_='b-tag-lenta__item m-type_blog')
+            blog_counter = 0
             for bnew in blog_news:
                 time_news = ''.join(
                     bnew.find(class_='b-tag-lenta__item-details').text).strip()
                 title = bnew.find('h2').text
                 url = bnew.find('a')['href']
                 if title is None:
-                    self.stdout.write(f'Title is None. Url: {url}\n')
+                    logging.info(f'Title is None. Url: {url}\n')
                     continue
                 if not News.objects.filter(source=url):
-                    self.stdout.write(f'Adding: {time_news}, {title}\n')
                     n = News(date=timetyper(time_news),
-                             team=team_name, title=title, source=url)
+                             team=team_name,
+                             title=title,
+                             source=url)
                     n.save()
+                    blog_counter += 1
+            logging.info(f'{blog_counter} blog news objects are added for {team_name}')
             short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
+            short_counter = 0
             for snew in short_news:
                 time_date = ''.join(
                     snew.find(class_='b-tag-lenta__item-details').text).strip()
@@ -142,14 +143,16 @@ class Command(BaseCommand):
                     title = element.find('h2').text
                     url = element.find('a')['href']
                     if title is None:
-                        self.stdout.write(f'Title is None. Url: {url}\n')
+                        logging.info(f'Title is None. Url: {url}\n')
                         continue
                     if not News.objects.filter(source=url):
-                        self.stdout.write(
-                            f'Adding: {news_exact_time}, {title}\n')
                         n = News(date=timetyper(news_exact_time),
-                                 team=team_name, title=title, source=url)
+                                 team=team_name,
+                                 title=title,
+                                 source=url)
                         n.save()
+                        short_counter += 1
+            logging.info(f'{short_counter} short news objects are added for {team_name}')
 
         desktop_agents = parser_config.DESKTOP_AGENTS
 
@@ -172,10 +175,20 @@ class Command(BaseCommand):
         teams_table = parser_config.TEAMS_TABLE_SITE
         html = get_start_page_html(teams_table)
         teams_urls = get_teams_urls(html)
+        team_counter = 0
         if html:
+            logging.info(f'Parser searches in {parser_config.NUMBER_OF_PAGES} pages')
             for team_name, team_url in teams_urls.items():
-                selenium_scroller(team_url, team_name)
+                team_counter += 1
+                logging.info(f'{team_name} is the {team_counter} of {len(teams_urls)} teams')
+                for _ in range(5):
+                    try:
+                        logging.info(f'Try #{_ + 1} of 5')
+                        selenium_scroller(team_url, team_name)
+                        break
+                    except TimeoutException:
+                        continue
         else:
-            logging.ERROR('Что-то пошло не по плану...')
+            logging.error('Что-то пошло не по плану...')
 
         browser.quit()
