@@ -17,24 +17,46 @@
   <div class="container">
     <h1>AFC Project</h1>
     <div class="row align-items-end alert alert-info">
-      <div class="col-10">
-        <h2>News</h2>
+      <div class="col-5">
+        <h2>News {{ team_1 }}</h2>
       </div>
-      <div class="col-2">
+      <div class="col-1">
+        <h2>Date</h2>
+      </div>
+      <div class="col-5">
+        <h2>News {{ team_2 }}</h2>
+      </div>
+      <div class="col-1">
         <h2>Date</h2>
       </div>
     </div>
-    {% for item in news %}
-    <div class="row alert alert-secondary">
-      <div class="col-10">
-        <p><a href={{ item.source }}>{{ item.title }}</a></p>
+    <div class="row">
+      <div class="col-6">
+        {% for item in news_1 %}
+        <div class="row alert alert-secondary">
+          <div class="col-10">
+            <p><a href={{ item.source }}>{{ item.title }}</a></p>
+          </div>
+          <div class="col-2">
+            <p>{{ item.date|date:"d.m.Y h:i" }}</p>
+          </div>
+        </div>  
+        {% endfor %}
       </div>
-      <div class="col-2">
-        <p>{{ item.date|date:"d.m.Y h:i" }}</p>
+      <div class="col-6">
+        {% for item in news_2 %}
+        <div class="row alert alert-secondary">
+          <div class="col-10">
+            <p><a href={{ item.source }}>{{ item.title }}</a></p>
+          </div>
+          <div class="col-2">
+            <p>{{ item.date|date:"d.m.Y h:i" }}</p>
+          </div>
+        </div>  
+        {% endfor %}
       </div>
     </div>
-    {% endfor %}
-  </div>
+   </div>
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
