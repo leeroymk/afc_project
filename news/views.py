@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import News
+from .models import News, StatEpl
 
 
 def index(request):
@@ -7,3 +7,10 @@ def index(request):
         'news': News.objects.all()
     }
     return render(request, 'news/index.html', context)
+
+
+def statistics(request):
+    context = {
+        'stats': StatEpl.objects.all(),
+    }
+    return render(request, 'news/parses.html', context)
