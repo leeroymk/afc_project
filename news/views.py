@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import News, StatEpl, GoalscorersEPL, AssistentsEPL
+from .models import News, StatEpl, GoalscorersEPL, AssistentsEPL, CalendarMatches
 
 
 def index(request):
@@ -26,5 +26,12 @@ def goalscorers_epl(request):
 def assistents_epl(request):
     context = {
         'assistents': AssistentsEPL.objects.all(),
+    }
+    return render(request, 'news/parses.html', context)
+
+
+def calendar(request):
+    context = {
+        'matches': CalendarMatches.objects.all(),
     }
     return render(request, 'news/parses.html', context)

@@ -12,7 +12,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from news.models import News
 from . import parser_config
@@ -85,25 +85,30 @@ class Command(BaseCommand):
                 return False
 
         # Получаем список команд лиги и ссылки
-        def get_teams_urls(html):
+        def get_teams_urls(teams_list_epl):
             teams_urls = {}
-            soup = BeautifulSoup(html, 'lxml')
+            soup = BeautifulSoup(teams_list_epl, 'lxml')
             teams_list = soup.find_all(class_='b-tag-table__content-team')
             # Добавляем ссылки к ключам-названиям команды
             for team in teams_list:
-                teams_urls[team.find('a').text] = team.find('a')['href']
+                # teams_urls[team.find('a').text] = team.find('a')['href']
+                # Возможный вариант наполенния
+                team_name = team.find('a').text
+                team_url = team.find('a')['href']
+                teams_urls.setdefault(team_name, team_url)
             return teams_urls
 
         # Скроллим страницу
         def selenium_scroller(team_url, team_name):
-            browser.get(team_url)
             try:
+                browser.get(team_url)
                 # Здесь настраиваем количество страниц прокрутки
                 for i in range(parser_config.NUMBER_OF_PAGES):
                     btn_xpath = '//button[(contains(@class,"b-tag-lenta__show-more-button")) and(contains(text(),"Показать еще"))]'
                     more_btn = browser.find_element(By.XPATH, btn_xpath)
                     browser.execute_script("arguments[0].click();", more_btn)
             except (requests.RequestException, ValueError) as er:
+                browser.delete_all_cookies()
                 logging.error(f'Ошибка {er} при парсинге {team_url}')
             finally:
                 # Передаем в парсер новостей прокрученную страницу
@@ -154,12 +159,35 @@ class Command(BaseCommand):
                         short_counter += 1
             logging.info(f'{short_counter} short news objects are added for {team_name}')
 
-        desktop_agents = parser_config.DESKTOP_AGENTS
+        # Проверка на вхождение соперника в АПЛ
+        # парсинг новостей команд-еврокубков
+        def rival_name_url(calendar_url):
+            req = requests.get(calendar_url)
+            soup = BeautifulSoup(req.text, 'lxml')
+            rows = soup.find('table', class_='stat-table').find_all('tr')
+            res_dict = {}
+            for row in rows:
+                links = row.find_all('a')
+                hrefs = [url['href'] for url in links]
+                names = [string.text for string in links]
+                if hrefs or names:
+                    score_or_preview = names[3].strip()
+                    if score_or_preview == 'превью':
+                        competition = names[1]
+                        if competition == 'Англия. Премьер-лига':
+                            return False
+                        href_team = hrefs[2].replace('/www.', '/m.')
+                        team_name = names[2]
+                        res_dict.setdefault(
+                            href_team,
+                            team_name)
+                        return res_dict
+            logging.error('Enjoy your vacation!')
+            return False
 
         def random_headers():
             return {'Accept': '*/*',
-                    'User-Agent': choice(desktop_agents),
-                    }
+                    'User-Agent': choice(parser_config.DESKTOP_AGENTS)}
 
         chrome_options = Options()
         chrome_options.add_argument('--headless')
@@ -171,19 +199,19 @@ class Command(BaseCommand):
             service=Service(ChromeDriverManager().install()),
             options=chrome_options,
         )
+        browser.set_page_load_timeout(30)
 
-        teams_table = parser_config.TEAMS_TABLE_SITE
-        html = get_start_page_html(teams_table)
-        teams_urls = get_teams_urls(html)
+        teams_list_epl = get_start_page_html(parser_config.TEAMS_TABLE_SITE)
+        teams_urls = get_teams_urls(teams_list_epl)
         team_counter = 0
-        if html:
+        if teams_list_epl:
             logging.info(f'Parser searches in {parser_config.NUMBER_OF_PAGES} pages')
             for team_name, team_url in teams_urls.items():
                 team_counter += 1
                 logging.info(f'{team_name} is the {team_counter} of {len(teams_urls)} teams')
                 for _ in range(5):
                     try:
-                        logging.info(f'Try #{_ + 1} of 5')
+                        logging.info(f'Try #{_ + 1} out of 5')
                         selenium_scroller(team_url, team_name)
                         break
                     except TimeoutException:
@@ -192,3 +220,5 @@ class Command(BaseCommand):
             logging.error('Что-то пошло не по плану...')
 
         browser.quit()
+        # for team_url, team_name in rival_name_url(calendar_url).items():
+        #     selenium_scroller(team_url, team_name)

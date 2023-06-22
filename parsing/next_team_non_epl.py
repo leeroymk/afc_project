@@ -29,11 +29,11 @@ def next_team_news(calendar_url):
     soup = BeautifulSoup(req.text, 'lxml')
     src = soup.find_all('table', class_='stat-table')
     pprint(src)
-    # tournament_data = []
-    # for row_data in src.find_all('tr'):
-    #     row = [', '.join(row_element.text.strip().split('\n')) for row_element in row_data.find_all('td')]
-    #     tournament_data.append(row)
-    #     return tournament_data
+    tournament_data = []
+    for row_data in src.find_all('tr'):
+        row = [', '.join(row_element.text.strip().split('\n')) for row_element in row_data.find_all('td')]
+        tournament_data.append(row)
+        return tournament_data
 
 
 if __name__ == '__main__':
