@@ -15,48 +15,71 @@
 
 <body>
   <div class="container">
-    <h1>AFC Project</h1>
-    <div class="row align-items-end alert alert-info">
-      <div class="col-5">
-        <h2>News {{ teams.0 }}</h2>
-      </div>
-      <div class="col-1">
-        <h2>Date</h2>
-      </div>
-      <div class="col-5">
-        <h2>News {{ teams.1 }}</h2>
-      </div>
-      <div class="col-1">
-        <h2>Date</h2>
-      </div>
+    <div class="row border border-dark" style="min-height: 300px;">
+      <table>
+        <tbody>
+          <tr>
+            <td class="px-5"><img src="https://upload.wikimedia.org/wikipedia/ru/5/53/Arsenal_FC.svg" height="200"></td>
+            <td class="align-middle px-5">
+              <h1>{{ team_1 }} vs {{ team_2 }}</h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <div class="row">
-      <div class="col-6">
-        {% for item in news_1 %}
-        <div class="row alert alert-secondary">
-          <div class="col-10">
-            <p><a href={{ item.source }}>{{ item.title }}</a></p>
-          </div>
-          <div class="col-2">
-            <p>{{ item.date|date:"d.m.Y h:i" }}</p>
-          </div>
-        </div>  
-        {% endfor %}
-      </div>
-      <div class="col-6">
-        {% for item in news_2 %}
-        <div class="row alert alert-secondary">
-          <div class="col-10">
-            <p><a href={{ item.source }}>{{ item.title }}</a></p>
-          </div>
-          <div class="col-2">
-            <p>{{ item.date|date:"d.m.Y h:i" }}</p>
-          </div>
-        </div>  
-        {% endfor %}
+      <div class="col-4 p-0">
+        <table>
+          <thead class="border border-top-0 border-dark">
+            <tr>
+              <th class="px-1">News {{ team_1 }}</th>
+              <th  class="px-1 text-center border-left border-dark">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in news_1 %}
+            <tr class="border border-dark">
+                <td class="px-1 small">
+                  <a href={{ item.source }}>{{ item.title|slice:"55" }}...</a>
+                </td>
+                <td class="px-1 text-center align-middle small border-left border-dark">
+                  {% now "d.m.Y" as today %}
+                  {% if  today == item.date|date:"d.m.Y" %}
+                    {{ item.date|date:"H:i" }}
+                  {% else %}
+                    {{ item.date|date:"d.m.Y" }}
+                  {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <thead class="border border-dark">
+            <tr>
+              <th class="px-1">News {{ team_2 }}</th>
+              <th class="px-1 text-center border-left border-dark">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in news_2 %}
+            <tr class="border border-dark">
+                <td class="px-1 small">
+                  <a href={{ item.source }}>{{ item.title|slice:"55" }}...</a>
+                </td>
+                <td class="px-1 text-center align-middle small border-left border-dark">
+                  {% now "d.m.Y" as today %}
+                  {% if  today == item.date|date:"d.m.Y" %}
+                    {{ item.date|date:"H:i" }}
+                  {% else %}
+                    {{ item.date|date:"d.m.Y" }}
+                  {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
-   </div>
+  </div>
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
