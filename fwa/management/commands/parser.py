@@ -14,7 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand, CommandError
 
-from news.models import News
+from fwa.models import News, Teams
 from . import parser_config
 
 
@@ -122,9 +122,13 @@ class Command(BaseCommand):
                 if title is None:
                     logging.info(f'Title is None. Url: {url}\n')
                     continue
+                if not Teams.objects.filter(name=team_name):
+                    t = Teams(name=team_name)
+                    t.save()
+                    logging.info(f'New team {team_name} is added to the Teams table.')
                 if not News.objects.filter(source=url):
                     n = News(date=timetyper(time_news),
-                             team=team_name,
+                             team=Teams.objects.filter(name=team_name).first(),
                              title=title,
                              source=url)
                     n.save()
@@ -145,9 +149,13 @@ class Command(BaseCommand):
                     if title is None:
                         logging.info(f'Title is None. Url: {url}\n')
                         continue
+                    if not Teams.objects.filter(name=team_name):
+                        t = Teams(name=team_name)
+                        t.save()
+                        logging.info(f'New team {team_name} is added to the Teams table.')
                     if not News.objects.filter(source=url):
                         n = News(date=timetyper(news_exact_time),
-                                 team=team_name,
+                                 team=Teams.objects.filter(name=team_name).first(),
                                  title=title,
                                  source=url)
                         n.save()
