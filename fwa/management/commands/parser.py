@@ -21,7 +21,11 @@ from . import parser_config
 class Command(BaseCommand):
     help = 'Parse news'
 
+    def add_arguments(self, parser):
+        parser.add_argument('pages_qty', action='store', nargs='?', default=10)
+
     def handle(self, *args, **options):
+        pages_qty = options['pages_qty']
         root = logging.getLogger()
         root.setLevel(logging.INFO)
         handler = logging.StreamHandler(sys.stdout)
@@ -99,7 +103,7 @@ class Command(BaseCommand):
             browser.get(team_url)
             try:
                 # Здесь настраиваем количество страниц прокрутки
-                for i in range(parser_config.NUMBER_OF_PAGES):
+                for i in range(pages_qty):
                     btn_xpath = '//button[(contains(@class,"b-tag-lenta__show-more-button")) and(contains(text(),"Показать еще"))]'
                     more_btn = browser.find_element(By.XPATH, btn_xpath)
                     browser.execute_script("arguments[0].click();", more_btn)
@@ -185,7 +189,7 @@ class Command(BaseCommand):
         teams_urls = get_teams_urls(html)
         team_counter = 0
         if html:
-            logging.info(f'Parser searches in {parser_config.NUMBER_OF_PAGES} pages')
+            logging.info(f'Parser searches in {pages_qty} pages')
             for team_name, team_url in teams_urls.items():
                 team_counter += 1
                 logging.info(f'{team_name} is the {team_counter} of {len(teams_urls)} teams')

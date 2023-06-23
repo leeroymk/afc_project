@@ -1,5 +1,4 @@
 TEAMS_TABLE_SITE = 'https://m.sports.ru/epl/table/'
-NUMBER_OF_PAGES = 10
 DESKTOP_AGENTS = [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
             'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
