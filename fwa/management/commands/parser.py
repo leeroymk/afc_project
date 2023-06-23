@@ -22,7 +22,7 @@ class Command(BaseCommand):
     help = 'Parse news'
 
     def add_arguments(self, parser):
-        parser.add_argument('pages_qty', action='store', nargs='?', default=10)
+        parser.add_argument('pages_qty', action='store', nargs='?', default=10, type=int)
 
     def handle(self, *args, **options):
         pages_qty = options['pages_qty']
