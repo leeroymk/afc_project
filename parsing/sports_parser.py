@@ -13,6 +13,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 
 
+logging.basicConfig(level=logging.DEBUG,
+                    filename='log_parsing.log',
+                    format="[%(asctime)s] %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
+                    datefmt='%H:%M:%S',
+                    )
+
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 handler = logging.StreamHandler(sys.stdout)
@@ -29,7 +35,7 @@ def get_start_page_html(url):
         result.raise_for_status()
         return result.text
     except (requests.RequestException, ValueError):
-        print('Сетевая ошибка')
+        logging.ERROR('Сетевая ошибка')
         return False
 
 
@@ -59,7 +65,7 @@ def selenium_scroller(url):
             more_btn = browser.find_element(By.XPATH, btn_xpath)
             browser.execute_script("arguments[0].click();", more_btn)
     except (requests.RequestException, ValueError) as er:
-        print(f'Ошибка {er} при парсинге {url}')
+        logging.ERROR(f'Ошибка {er} при парсинге {url}')
     finally:
         # Передаем в парсер новостей прокрученную страницу
         return get_team_news(browser.page_source)
@@ -106,17 +112,6 @@ def get_team_news(scrolled_page):
 
 
 if __name__ == "__main__":
-
-    logging.basicConfig(level=logging.INFO,
-                        filename='log_parsing.log',
-                        format="[%(asctime)s] %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
-                        datefmt='%H:%M:%S',
-                        )
-    logging.debug("A DEBUG Message")
-    logging.info("An INFO")
-    logging.warning("A WARNING")
-    logging.error("An ERROR")
-    logging.critical("A message of CRITICAL severity")
 
     desktop_agents = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
@@ -168,6 +163,6 @@ if __name__ == "__main__":
                     }
             )
     else:
-        print('Что-то пошло не по плану...')
+        logging.ERROR('Что то пошло не так')
 
     browser.quit()

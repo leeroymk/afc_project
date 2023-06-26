@@ -13,3 +13,50 @@ class News(models.Model):
 
     def __str__(self):
         return f'<News: {self.title} from {self.source}>'
+
+
+class StatEpl(models.Model):
+    position = models.IntegerField()
+    team = models.CharField(max_length=50)
+    matches = models.IntegerField()
+    win = models.IntegerField()
+    draw = models.IntegerField()
+    loss = models.IntegerField()
+    scored = models.IntegerField()
+    conceded = models.IntegerField()
+    points = models.IntegerField()
+    season = models.CharField(max_length=15)
+
+    def __str__(self):
+        return f'<News: {self.team_name} has {self.points}>. Season - {self.season}'
+
+
+class GoalscorersEPL(models.Model):
+    position = models.IntegerField()
+    player_name = models.CharField(max_length=50)
+    team_name = models.CharField(max_length=50)
+    goals = models.IntegerField()
+
+    def __str__(self):
+        return f'<News: {self.player_name} has {self.goals} goals>. Season - {self.season}'
+
+
+class AssistentsEPL(models.Model):
+    position = models.IntegerField()
+    player_name = models.CharField(max_length=50)
+    team_name = models.CharField(max_length=50)
+    assists = models.IntegerField()
+
+    def __str__(self):
+        return f'<News: {self.player_name} has {self.assists} assists>. Season - {self.season}'
+
+
+class CalendarMatches(models.Model):
+    date_match = models.DateTimeField()
+    tournament = models.CharField(max_length=50)
+    opposite_team = models.CharField(max_length=50)
+    place_match = models.CharField(max_length=10)
+    match_score = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f'<News: Match against {self.opposite_team}. Score: {self.match_score}.'
