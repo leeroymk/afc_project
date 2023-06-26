@@ -21,25 +21,25 @@ def statistics(request):
     context = {
         'stats': StatEpl.objects.all(),
     }
-    return render(request, 'news/parses.html', context)
+    return render(request, 'fwa/parses.html', context)
 
 
 def goalscorers_epl(request):
     context = {
         'goalscorers': GoalscorersEPL.objects.all(),
     }
-    return render(request, 'news/parses.html', context)
+    return render(request, 'fwa/parses.html', context)
 
 
 def assistents_epl(request):
     context = {
         'assistents': AssistentsEPL.objects.all(),
     }
-    return render(request, 'news/parses.html', context)
+    return render(request, 'fwa/parses.html', context)
 
 
 def calendar(request):
     context = {
         'matches': CalendarMatches.objects.all(),
     }
-    return render(request, 'news/parses.html', context)
+    return render(request, 'fwa/parses.html', context)
