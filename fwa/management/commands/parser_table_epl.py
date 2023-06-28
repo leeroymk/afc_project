@@ -4,6 +4,7 @@ import requests
 
 from fwa.models import StatEpl
 from django.core.management.base import BaseCommand
+from django.db import connection
 
 
 class Command(BaseCommand):
@@ -15,7 +16,8 @@ class Command(BaseCommand):
             src = read_html(table_url, encoding='utf-8')
             table_data = src[1]
 
-            StatEpl.objects.all().delete()
+            cursor = connection.cursor()
+            cursor.execute('TRUNCATE TABLE "{0}"'.format(StatEpl._meta.db_table))
 
             for index, row in table_data.iterrows():
                 model = StatEpl()
@@ -38,6 +40,7 @@ class Command(BaseCommand):
             season = selected[1].text
             return season
 
-        table_url = 'https://www.sports.ru/epl/table/'
+        # table_url = 'https://www.sports.ru/epl/table/'
+        table_url = 'https://www.sports.ru/epl/table/?s=270059&sub=table'
         season = year_parser(table_url)
         epl_table_parsing(table_url, season)

@@ -36,6 +36,7 @@ class GoalscorersEPL(models.Model):
     player_name = models.CharField(max_length=50)
     team_name = models.CharField(max_length=50)
     goals = models.IntegerField()
+    season = models.CharField(max_length=15)
 
     def __str__(self):
         return f'<News: {self.player_name} has {self.goals} goals>. Season - {self.season}'
@@ -46,6 +47,7 @@ class AssistentsEPL(models.Model):
     player_name = models.CharField(max_length=50)
     team_name = models.CharField(max_length=50)
     assists = models.IntegerField()
+    season = models.CharField(max_length=15)
 
     def __str__(self):
         return f'<News: {self.player_name} has {self.assists} assists>. Season - {self.season}'
@@ -57,6 +59,7 @@ class CalendarMatches(models.Model):
     opposite_team = models.CharField(max_length=50)
     place_match = models.CharField(max_length=10)
     match_score = models.CharField(max_length=10)
+    season = models.CharField(max_length=15)
 
     def __str__(self):
         return f'<News: Match against {self.opposite_team}. Score: {self.match_score}.'
