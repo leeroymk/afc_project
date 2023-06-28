@@ -23,9 +23,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('pages_qty', action='store', nargs='?', default=10, type=int)
+        parser.add_argument('timeout_timer', action='store', nargs='?', default=60, type=int)
 
     def handle(self, *args, **options):
         pages_qty = options['pages_qty']
+        timeout_timer = options['timeout_timer']
         root = logging.getLogger()
         root.setLevel(logging.INFO)
         handler = logging.StreamHandler(sys.stdout)
@@ -126,13 +128,13 @@ class Command(BaseCommand):
                 if title is None:
                     logging.info(f'Title is None. Url: {url}\n')
                     continue
-                if not Teams.objects.filter(name=team_name):
+                if not Teams.objects.filter(name=team_name).exists():
                     t = Teams(name=team_name)
                     t.save()
                     logging.info(f'New team {team_name} is added to the Teams table.')
                 if not News.objects.filter(source=url):
                     n = News(date=timetyper(time_news),
-                             team=Teams.objects.filter(name=team_name).first(),
+                             team=Teams.objects.get(name=team_name),
                              title=title,
                              source=url)
                     n.save()
@@ -183,6 +185,7 @@ class Command(BaseCommand):
             service=Service(ChromeDriverManager().install()),
             options=chrome_options,
         )
+        browser.set_page_load_timeout(timeout_timer)
 
         teams_table = parser_config.TEAMS_TABLE_SITE
         html = get_start_page_html(teams_table)
@@ -190,6 +193,7 @@ class Command(BaseCommand):
         team_counter = 0
         if html:
             logging.info(f'Parser searches in {pages_qty} pages')
+            logging.info(f'Timeout exception timer is set for {timeout_timer} seconds')
             for team_name, team_url in teams_urls.items():
                 team_counter += 1
                 logging.info(f'{team_name} is the {team_counter} of {len(teams_urls)} teams')
