@@ -1,8 +1,9 @@
 from pandas import read_html
 from bs4 import BeautifulSoup
+import logging
 import requests
 
-from fwa.models import StatEpl
+from fwa.models import StatEpl, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection
 
@@ -20,9 +21,13 @@ class Command(BaseCommand):
             cursor.execute('TRUNCATE TABLE "{0}"'.format(StatEpl._meta.db_table))
 
             for index, row in table_data.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Команда'])
+                if created:
+                    logging.info(f"New team {row['Команда']} is added to the Teams table.")
+
                 model = StatEpl()
                 model.position = row['Unnamed: 0']
-                model.team = row['Команда']
+                model.team = team
                 model.matches = row['М']
                 model.win = row['В']
                 model.draw = row['Н']

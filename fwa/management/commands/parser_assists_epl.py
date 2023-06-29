@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
+import logging
 import pandas as pd
 import requests
 
-from fwa.models import AssistentsEPL
+from fwa.models import AssistentsEPL, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection
 
@@ -25,10 +26,14 @@ class Command(BaseCommand):
             cursor.execute('TRUNCATE TABLE "{0}"'.format(AssistentsEPL._meta.db_table))
 
             for index, row in assists_table.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Команда'])
+                if created:
+                    logging.info(f"New team {row['Команда']} is added to the Teams table.")
+
                 model = AssistentsEPL()
                 model.position = row['Unnamed: 0']
-                model.player_name = row['Имя']
-                model.team_name = row['Команда']
+                model.player = row['Имя']
+                model.team = team
                 model.assists = row['П']
                 model.season = season
                 model.save()

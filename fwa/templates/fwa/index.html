@@ -84,7 +84,7 @@
   <br>
   <p>Stats are the following</p>
   {% for item in stats %}
-  <p>Team {{item.team}} is on the {{item.position}} place with {{item.matches}} matches played: {{item.win}}/{{item.loss}}</p>
+  <p>Team {{item.team.name}} is on the {{item.position}} place with {{item.matches}} matches played: {{item.win}}/{{item.loss}}</p>
   {% endfor %}
 
 

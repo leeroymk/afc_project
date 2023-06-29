@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
+import logging
 from pandas import read_html
 import requests
 
-from fwa.models import GoalscorersEPL
+from fwa.models import GoalscorersEPL, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection
 
@@ -27,10 +28,14 @@ class Command(BaseCommand):
             cursor.execute('TRUNCATE TABLE "{0}"'.format(GoalscorersEPL._meta.db_table))
 
             for index, row in goals_table.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Команда'])
+                if created:
+                    logging.info(f"New team {row['Команда']} is added to the Teams table.")
+
                 model = GoalscorersEPL()
                 model.position = row['№']
-                model.player_name = row['Имя']
-                model.team_name = row['Команда']
+                model.player = row['Имя']
+                model.team = team
                 model.goals = row['Голов'].split()[0]
                 model.season = season
                 model.save()
