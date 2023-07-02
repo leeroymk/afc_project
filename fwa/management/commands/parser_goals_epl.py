@@ -5,7 +5,7 @@ import requests
 
 from fwa.models import GoalscorersEPL, Teams
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connection, transaction
 
 
 class Command(BaseCommand):
@@ -27,18 +27,19 @@ class Command(BaseCommand):
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}"'.format(GoalscorersEPL._meta.db_table))
 
-            for index, row in goals_table.iterrows():
-                team, created = Teams.objects.get_or_create(name=row['Команда'])
-                if created:
-                    logging.info(f"New team {row['Команда']} is added to the Teams table.")
+            with transaction.atomic():
+                for index, row in goals_table.iterrows():
+                    team, created = Teams.objects.get_or_create(name=row['Команда'])
+                    if created:
+                        logging.info(f"New team {row['Команда']} is added to the Teams table.")
 
-                model = GoalscorersEPL()
-                model.position = row['№']
-                model.player = row['Имя']
-                model.team = team
-                model.goals = row['Голов'].split()[0]
-                model.season = season
-                model.save()
+                    model = GoalscorersEPL()
+                    model.position = row['№']
+                    model.player = row['Имя']
+                    model.team = team
+                    model.goals = row['Голов'].split()[0]
+                    model.season = season
+                    model.save()
 
         goals_url = 'http://fapl.ru/topscorers/'
 

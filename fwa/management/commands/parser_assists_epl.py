@@ -5,7 +5,7 @@ import requests
 
 from fwa.models import AssistentsEPL, Teams
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connection, transaction
 
 
 class Command(BaseCommand):
@@ -25,18 +25,19 @@ class Command(BaseCommand):
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}"'.format(AssistentsEPL._meta.db_table))
 
-            for index, row in assists_table.iterrows():
-                team, created = Teams.objects.get_or_create(name=row['Команда'])
-                if created:
-                    logging.info(f"New team {row['Команда']} is added to the Teams table.")
+            with transaction.atomic():
+                for index, row in assists_table.iterrows():
+                    team, created = Teams.objects.get_or_create(name=row['Команда'])
+                    if created:
+                        logging.info(f"New team {row['Команда']} is added to the Teams table.")
 
-                model = AssistentsEPL()
-                model.position = row['Unnamed: 0']
-                model.player = row['Имя']
-                model.team = team
-                model.assists = row['П']
-                model.season = season
-                model.save()
+                    model = AssistentsEPL()
+                    model.position = row['Unnamed: 0']
+                    model.player = row['Имя']
+                    model.team = team
+                    model.assists = row['П']
+                    model.season = season
+                    model.save()
 
         # Ссылка на статистику сезона 22/23
         assists_url = 'https://www.sports.ru/epl/bombardiers/?&s=goal_passes&d=1&season=270059'
