@@ -1,5 +1,4 @@
 import logging
-import sys
 import requests
 from random import choice
 from datetime import datetime, timedelta
@@ -17,6 +16,8 @@ from django.core.management.base import BaseCommand
 from fwa.models import News, Teams
 from . import parser_config
 
+root = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     help = 'Parse news'
@@ -26,22 +27,13 @@ class Command(BaseCommand):
         parser.add_argument('timeout_timer', action='store', nargs='?', default=60, type=int)
 
     def handle(self, *args, **options):
+
+        root.info('News is parsing...')
+
         pages_qty = options['pages_qty']
         timeout_timer = options['timeout_timer']
-        root = logging.getLogger()
-        root.setLevel(logging.INFO)
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        root.addHandler(handler)
 
-        logging.basicConfig(level=logging.INFO,
-                            filename='log_parsing.log',
-                            format="[%(asctime)s] %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
-                            datefmt='%H:%M:%S',
-                            )
+        start_news_parsing = datetime.now()
 
         def timetyper(parsed):
             parsed = parsed.lower()
@@ -87,7 +79,7 @@ class Command(BaseCommand):
                 result.raise_for_status()
                 return result.text
             except (requests.RequestException, ValueError):
-                logging.error('Сетевая ошибка')
+                root.error('Сетевая ошибка')
                 return False
 
         # Получаем список команд лиги и ссылки
@@ -114,7 +106,7 @@ class Command(BaseCommand):
                         browser.execute_script("arguments[0].click();", more_btn)
                 except (requests.RequestException, ValueError) as er:
                     browser.delete_all_cookies()
-                    logging.error(f'Ошибка {er} при парсинге {team_url}')
+                    root.error(f'Ошибка {er} при парсинге {team_url}')
                 finally:
                     # Передаем в парсер новостей прокрученную страницу
                     get_team_news(browser.page_source, team_name)
@@ -130,11 +122,11 @@ class Command(BaseCommand):
                 title = bnew.find('h2').text
                 url = bnew.find('a')['href'].replace('//m.', '//')
                 if title is None:
-                    logging.info(f'Title is None. Url: {url}\n')
+                    root.info(f'Title is None. Url: {url}\n')
                     continue
                 team, created = Teams.objects.get_or_create(name=team_name)
                 if created:
-                    logging.info(f'New team {team_name} is added to the Teams table.')
+                    root.info(f'New team {team_name} is added to the Teams table.')
                 if not News.objects.filter(source=url):
                     n = News(date=timetyper(time_news),
                              team=team,
@@ -142,7 +134,7 @@ class Command(BaseCommand):
                              source=url)
                     n.save()
                     blog_counter += 1
-            logging.info(f'{blog_counter} blog news objects are added for {team_name}')
+            root.info(f'{blog_counter} blog news objects are added for {team_name}')
             short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
             short_counter = 0
             for snew in short_news:
@@ -156,11 +148,11 @@ class Command(BaseCommand):
                     title = element.find('h2').text
                     url = element.find('a')['href'].replace('//m.', '//')
                     if title is None:
-                        logging.info(f'Title is None. Url: {url}\n')
+                        root.info(f'Title is None. Url: {url}\n')
                         continue
                     team, created = Teams.objects.get_or_create(name=team_name)
                     if created:
-                        logging.info(f'New team {team_name} is added to the Teams table.')
+                        root.info(f'New team {team_name} is added to the Teams table.')
                     if not News.objects.filter(source=url):
                         n = News(date=timetyper(news_exact_time),
                                  team=team,
@@ -168,7 +160,7 @@ class Command(BaseCommand):
                                  source=url)
                         n.save()
                         short_counter += 1
-            logging.info(f'{short_counter} short news objects are added for {team_name}')
+            root.info(f'{short_counter} short news objects are added for {team_name}')
 
         # Проверка на вхождение соперника в АПЛ
         # парсинг новостей команд-еврокубков
@@ -212,30 +204,37 @@ class Command(BaseCommand):
         # Парсим отдельно новости следующей команды (кубки)
         for number in range(3):
             try:
-                logging.info(f'Try #{number + 1} out of 3')
+                root.info(f'Try #{number + 1} out of 3')
                 selenium_scroller(*rival_name_url(calendar_url))
                 break
             except TypeError:
-                logging.info('Enjoy your vacation!')
+                root.info('Enjoy your vacation!')
             except TimeoutException:
                 continue
 
         # Парсим новости лиги
         team_counter = 0
         if teams_list_epl:
-            logging.info(f'Parser searches in {pages_qty} pages')
-            logging.info(f'Timeout exception timer is set for {timeout_timer} seconds')
+            root.info(f'Parser searches in {pages_qty} pages')
+            root.info(f'Timeout exception timer is set for {timeout_timer} seconds')
             for team_name, team_url in teams_urls.items():
                 team_counter += 1
-                logging.info(f'{team_name} is the {team_counter} of {len(teams_urls)} teams')
+                root.info(f'{team_name} is the {team_counter} of {len(teams_urls)} teams')
                 for number in range(5):
                     try:
-                        logging.info(f'Try #{number + 1} out of 5')
+                        root.info(f'Try #{number + 1} out of 5')
                         selenium_scroller(team_url, team_name)
                         break
                     except TimeoutException:
                         continue
         else:
-            logging.error('Что-то пошло не по плану...')
+            root.error('Что-то пошло не по плану...')
 
         browser.quit()
+
+        finish_news_parsing = datetime.now()
+        news_parse_time = finish_news_parsing-start_news_parsing
+        res_time = news_parse_time.total_seconds()
+
+        root.info('OK!')
+        root.info(f'Parsing news duration: {res_time} seconds!')

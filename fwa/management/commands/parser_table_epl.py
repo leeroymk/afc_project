@@ -8,10 +8,15 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
 
+root = logging.getLogger(__name__)
+
+
 class Command(BaseCommand):
     help = 'Parse table'
 
     def handle(self, *args, **options):
+
+        root.info('EPL table is parsing...')
 
         def epl_table_parsing(table_url, season):
             src = read_html(table_url, encoding='utf-8')
@@ -50,3 +55,4 @@ class Command(BaseCommand):
         table_url = 'https://www.sports.ru/epl/table/?s=270059&sub=table'
         season = year_parser(table_url)
         epl_table_parsing(table_url, season)
+        root.info('OK!')
