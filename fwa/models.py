@@ -3,6 +3,9 @@ from django.db import models
 
 class Teams(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    url = models.URLField(null=True)
+    tag = models.CharField(max_length=25, null=True)
+    logo = models.URLField(null=True)
 
 
 class News(models.Model):

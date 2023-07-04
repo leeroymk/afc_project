@@ -12,6 +12,7 @@ class Command(BaseCommand):
     help = 'Parse assists'
 
     def handle(self, *args, **options):
+
         def assists_parsing(assists_url):
             # Находим годы проведения сезона
             req = requests.get(assists_url)
@@ -41,3 +42,4 @@ class Command(BaseCommand):
         # Ссылка на статистику сезона 22/23
         assists_url = 'https://www.sports.ru/epl/bombardiers/?&s=goal_passes&d=1&season=270059'
         assists_parsing(assists_url)
+        logging.info(f'{__name__} script is finished')

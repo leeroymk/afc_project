@@ -25,12 +25,15 @@ class Command(BaseCommand):
             goals_table = src[0]
 
             cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}"'.format(GoalscorersEPL._meta.db_table))
+            cursor.execute('TRUNCATE TABLE "{0}"'.format(
+                GoalscorersEPL._meta.db_table))
 
             for index, row in goals_table.iterrows():
-                team, created = Teams.objects.get_or_create(name=row['Команда'])
+                team, created = Teams.objects.get_or_create(
+                    name=row['Команда'])
                 if created:
-                    logging.info(f"New team {row['Команда']} is added to the Teams table.")
+                    logging.info(
+                        f"New team {row['Команда']} is added to the Teams table.")
 
                 model = GoalscorersEPL()
                 model.position = row['№']
@@ -43,3 +46,4 @@ class Command(BaseCommand):
         goals_url = 'http://fapl.ru/topscorers/'
 
         goals_parsing(goals_url)
+        logging.info(f'{__name__} script is finished')

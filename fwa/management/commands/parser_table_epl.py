@@ -49,3 +49,4 @@ class Command(BaseCommand):
         table_url = 'https://www.sports.ru/epl/table/?s=270059&sub=table'
         season = year_parser(table_url)
         epl_table_parsing(table_url, season)
+        logging.info(f'{__name__} script is finished')
