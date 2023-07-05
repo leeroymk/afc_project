@@ -14,7 +14,7 @@
 </head>
 <div class="container">
   <body>
-    <a href="{% url 'index-page' %}{{getreq}}">Go back to main page</a>
+    <a href="{% url 'index-page' %}?team_name={{ team_1.name }}">Go back to main page</a>
     <h2>News page</h2>
     <table>
       <thead class="border border-dark">

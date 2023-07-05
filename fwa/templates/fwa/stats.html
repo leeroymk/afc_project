@@ -14,7 +14,7 @@
 </head>
 <div class="container">
   <body>
-    <a href="{% url 'index-page' %}{{getreq}}">Go back to main page</a>
+    <a href="{% url 'index-page' %}?team_name={{ team_1.name }}">Go back to main page</a>
     <h2>Statistics page for season {{ season }}</h2>
     <table>
       <thead class="border border-dark">
@@ -32,11 +32,13 @@
       </thead>
       <tbody>
         {% for stat in stats %}
-        {% if stat.team.name == team_1%}
-          <tr class="border border-dark table-warning">
-        {% else %}
-          <tr class="border border-dark">
-        {% endif %}
+          {% if stat.team.name == team_1.name %}
+            <tr class="border border-dark table-warning">
+          {% elif stat.team.name == team_2.name %}
+            <tr class="border border-dark table-info">
+          {% else %}
+            <tr class="border border-dark">
+          {% endif %}          
             <td class="px-1 text-center small">
               {{ stat.position }}
             </td>
@@ -64,7 +66,7 @@
             <td class="px-1 text-center align-middle small border-left border-dark">
               {{ stat.points }}
             </td>
-        </tr>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
