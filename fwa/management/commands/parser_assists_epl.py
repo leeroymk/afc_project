@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
 
-root = logging.getLogger(__name__)
+logging_fwa = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         def assists_parsing(assists_url):
 
-            root.info('Assistents statistics is parsing...')
+            logging_fwa.info('Assistents statistics is parsing...')
             # Находим годы проведения сезона
             req = requests.get(assists_url)
             soup = BeautifulSoup(req.text, 'html.parser')
@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 for index, row in assists_table.iterrows():
                     team, created = Teams.objects.get_or_create(name=row['Команда'])
                     if created:
-                        root.info(f"New team {row['Команда']} is added to the Teams table.")
+                        logging_fwa.info(f"New team {row['Команда']} is added to the Teams table.")
 
                     model = AssistentsEPL()
                     model.position = row['Unnamed: 0']
@@ -47,4 +47,4 @@ class Command(BaseCommand):
         # Ссылка на статистику сезона 22/23
         assists_url = 'https://www.sports.ru/epl/bombardiers/?&s=goal_passes&d=1&season=270059'
         assists_parsing(assists_url)
-        root.info('OK!')
+        logging_fwa.info('Assistents statistics DONE!')

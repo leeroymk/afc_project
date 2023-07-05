@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
 
-root = logging.getLogger(__name__)
+logging_fwa = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -19,7 +19,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         def calendar_parsing(calendar_url):
 
-            root.info('Calendar is parsing...')
+            logging_fwa.info('Calendar is parsing...')
             # Находим годы проведения сезона
             req = requests.get(calendar_url)
             soup = BeautifulSoup(req.text, 'lxml')
@@ -46,4 +46,4 @@ class Command(BaseCommand):
 
         calendar_url = 'https://www.sports.ru/arsenal/calendar/'
         calendar_parsing(calendar_url)
-        root.info('OK!')
+        logging_fwa.info('Calendar parsing DONE!')

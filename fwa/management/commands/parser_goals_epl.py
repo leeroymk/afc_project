@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
 
-root = logging.getLogger(__name__)
+logging_fwa = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
         def goals_parsing(goals_url):
 
-            root.info('Goalscorers statistics is parsing...')
+            logging_fwa.info('Goalscorers statistics is parsing...')
 
             # Находим годы проведения сезона
             req = requests.get(goals_url)
@@ -37,7 +37,7 @@ class Command(BaseCommand):
                 for index, row in goals_table.iterrows():
                     team, created = Teams.objects.get_or_create(name=row['Команда'])
                     if created:
-                        root.info(f"New team {row['Команда']} is added to the Teams table.")
+                        logging_fwa.info(f"New team {row['Команда']} is added to the Teams table.")
 
                     model = GoalscorersEPL()
                     model.position = row['№']
@@ -50,4 +50,4 @@ class Command(BaseCommand):
         goals_url = 'http://fapl.ru/topscorers/'
 
         goals_parsing(goals_url)
-        root.info('OK!')
+        logging_fwa.info('Goalscorers statistics DONE!')

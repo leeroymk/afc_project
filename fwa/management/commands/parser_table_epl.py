@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
 
-root = logging.getLogger(__name__)
+logging_fwa = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        root.info('EPL table is parsing...')
+        logging_fwa.info('EPL table is parsing...')
 
         def epl_table_parsing(table_url, season):
             src = read_html(table_url, encoding='utf-8')
@@ -51,8 +51,13 @@ class Command(BaseCommand):
             season = selected[1].text
             return season
 
+        # Актуальная таблица для парсинга
         # table_url = 'https://www.sports.ru/epl/table/'
+
+        # Демонстрационная таблица (сезон 2022/2023 завершился)
         table_url = 'https://www.sports.ru/epl/table/?s=270059&sub=table'
+
         season = year_parser(table_url)
         epl_table_parsing(table_url, season)
-        root.info('OK!')
+
+        logging_fwa.info('EPL table parsing DONE!')

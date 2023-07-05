@@ -142,22 +142,22 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "brief",
-            "level": "INFO",
+            "level": "DEBUG",
             "stream": "ext://sys.stdout"
         },
         "file": {
-            "level": "INFO",
+            "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": "fwa_log.log",
-            "maxBytes": 1024*5,
+            "maxBytes": 5120,
             "formatter": "standart",
         },
     },
     "loggers": {
-        "root": {
+        "fwa": {
             "handlers": ["console", "file"],
-            "level": "INFO",
-            'propagate': False
-            }
+            "level": "DEBUG",
+            "propagate": True
+        }
     },
 }
