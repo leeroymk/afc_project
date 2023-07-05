@@ -18,7 +18,7 @@ class Command(BaseCommand):
             table_data = src[1]
 
             cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}"'.format(StatEpl._meta.db_table))
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
 
             with transaction.atomic():
                 for index, row in table_data.iterrows():
