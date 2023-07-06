@@ -1,3 +1,4 @@
+import logging
 import requests
 from datetime import datetime
 
@@ -9,12 +10,16 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
 
+logging_fwa = logging.getLogger(__name__)
+
+
 class Command(BaseCommand):
     help = 'Parse calendar'
 
     def handle(self, *args, **options):
         def calendar_parsing(calendar_url):
 
+            logging_fwa.info('Calendar is parsing...')
             # Находим годы проведения сезона
             req = requests.get(calendar_url)
             soup = BeautifulSoup(req.text, 'lxml')
@@ -41,3 +46,4 @@ class Command(BaseCommand):
 
         calendar_url = 'https://www.sports.ru/arsenal/calendar/'
         calendar_parsing(calendar_url)
+        logging_fwa.info('Calendar parsing DONE!')
