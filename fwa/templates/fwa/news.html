@@ -14,8 +14,8 @@
 </head>
 <div class="container">
   <body>
-    <a href="{% url 'index-page' %}">Go back to main page</a>
-    <h1>News page</h1>
+    <a href="{% url 'index-page' %}?team_name={{ team_1.name }}">Go back to main page</a>
+    <h2>News page</h2>
     <table>
       <thead class="border border-dark">
         <tr>

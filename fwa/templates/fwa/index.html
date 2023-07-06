@@ -15,15 +15,33 @@
 
 <body>
   <div class="container">
-    <div class="row border border-dark" style="min-height: 300px;">
+    <div class="row">
+      <form action="/" method="get">
+        <div style="float: left" class="px-2">
+          <label for="team_name">Choose your team:</label>
+        </div>
+        <div style="float: left" class="px-2">
+          <select class="form-control form-control-sm" id="team_name" name="team_name">
+            <option selected>Current team is {{ team_1.name }}</option>
+            {% for team in teams %}
+              <option>{{ team.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="float: left" class="px-2">
+          <input type="submit" value="Submit">
+        </div>
+      </form>
+    </div>
+    <div class="row border border-dark" style="min-height: 220px;">
       <table>
         <tbody>
           <tr>
-            <td class="px-5"><img src="https://upload.wikimedia.org/wikipedia/ru/5/53/Arsenal_FC.svg" height="200"></td>
+            <td class="px-5"><img src={{ team_1.logo }} height="200"></td>
             <td class="align-middle px-5">
-              <h2>{{ team_1 }} vs {{ team_2 }}</h2>
+              <h2>{{ team_1.name }} vs {{ team_2.name }}</h2>
             </td>
-            <td class="px-5"><img src="https://upload.wikimedia.org/wikipedia/ru/9/96/Manchester_City_FC.svg" height="200"></td>
+            <td class="px-5"><img src={{ team_2.logo }} height="200"></td>
           </tr>
         </tbody>
       </table>
@@ -33,7 +51,7 @@
         <table>
           <thead class="border border-top-0 border-dark">
             <tr>
-              <th class="px-1"><a href="{% url 'news-page' %}">News</a> {{ team_1 }}</th>
+              <th class="px-1"><a href="{% url 'news-page' %}?team_name={{ team_1.name }}">News</a> {{ team_1.name }}</th>
               <th  class="px-1 text-center border-left border-dark">Date</th>
             </tr>
           </thead>
@@ -56,7 +74,7 @@
           </tbody>
           <thead class="border border-dark">
             <tr>
-              <th class="px-1"><a href="{% url 'news-page' %}">News</a> {{ team_2 }}</th>
+              <th class="px-1"><a href="{% url 'news-page' %}?team_name={{ team_1.name }}">News</a> {{ team_2.name }}</th>
               <th class="px-1 text-center border-left border-dark">Date</th>
             </tr>
           </thead>
@@ -79,13 +97,30 @@
           </tbody>
         </table>
       </div>
+      <div class="col-8 p-0">
+        <table class="w-100">
+          <thead class="border-right border-bottom border-dark">
+            <tr>
+              <th class="px-1">Rivals <a href="{% url 'stats-page' %}?team_name={{ team_1.name }}">statistics</a></th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small">
+                  {{ stats_1.team.name }} is on the {{ stats_1.position }} position with {{ stats_1.matches }} matches played. W/L/D: {{ stats_1.win }}/{{ stats_1.loss }}/{{ stats_1.draw }}
+                </td>
+              </tr>
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small">
+                  {{ stats_2.team.name }} is on the {{ stats_2.position }} position with {{ stats_2.matches }} matches played. W/L/D: {{ stats_2.win }}/{{ stats_2.loss }}/{{ stats_2.draw }}
+                </td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <br>
-  <p>Stats are the following</p>
-  {% for item in stats %}
-  <p>Team {{item.team.name}} is on the {{item.position}} place with {{item.matches}} matches played: {{item.win}}/{{item.loss}}</p>
-  {% endfor %}
 
 
   <!-- Optional JavaScript -->
