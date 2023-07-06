@@ -31,7 +31,7 @@ class Command(BaseCommand):
 
             # Чистим данные таблицы
             cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}"'.format(CalendarMatches._meta.db_table))
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
 
             with transaction.atomic():
                 for index, row in calendar_table.iterrows():

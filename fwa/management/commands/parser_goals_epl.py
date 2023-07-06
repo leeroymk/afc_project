@@ -31,7 +31,7 @@ class Command(BaseCommand):
             goals_table = src[0]
 
             cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}"'.format(GoalscorersEPL._meta.db_table))
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
 
             with transaction.atomic():
                 for index, row in goals_table.iterrows():

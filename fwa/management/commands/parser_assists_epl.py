@@ -28,7 +28,7 @@ class Command(BaseCommand):
             assists_table = src[1].drop(['М', 'Г', 'Пен', 'Г+П'], axis=1)
 
             cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}"'.format(AssistentsEPL._meta.db_table))
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistentsEPL._meta.db_table))
 
             with transaction.atomic():
                 for index, row in assists_table.iterrows():
