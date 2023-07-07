@@ -135,14 +135,14 @@ LOGGING = {
             "datefmt": "%Y-%m-%d %H:%M:%S"
         },
         "brief": {
-            "format": "%(message)s"
+            "format": "[%(asctime)s] %(message)s"
         }
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "brief",
-            "level": "DEBUG",
+            "level": "INFO",
             "stream": "ext://sys.stdout"
         },
         "file": {
@@ -157,7 +157,6 @@ LOGGING = {
         "fwa": {
             "handlers": ["console", "file"],
             "level": "DEBUG",
-            "propagate": True
         }
     },
 }

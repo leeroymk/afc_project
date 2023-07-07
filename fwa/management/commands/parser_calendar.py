@@ -3,6 +3,7 @@ import requests
 from datetime import datetime
 
 from bs4 import BeautifulSoup
+import lxml
 from pandas import read_html
 
 from fwa.models import CalendarMatches
@@ -19,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         def calendar_parsing(calendar_url):
 
-            logging_fwa.info('Calendar is parsing...')
+            logging_fwa.info('Парсинг календаря ближайших встреч...')
             # Находим годы проведения сезона
             req = requests.get(calendar_url)
             soup = BeautifulSoup(req.text, 'lxml')
@@ -46,4 +47,4 @@ class Command(BaseCommand):
 
         calendar_url = 'https://www.sports.ru/arsenal/calendar/'
         calendar_parsing(calendar_url)
-        logging_fwa.info('Calendar parsing DONE!')
+        logging_fwa.info('Парсинг календаря ближайших встреч завершен!')

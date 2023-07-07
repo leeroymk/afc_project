@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
+import lxml
 import logging
-import pandas as pd
+from pandas import read_html
 import requests
 
 from fwa.models import AssistentsEPL, Teams
@@ -17,14 +18,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         def assists_parsing(assists_url):
 
-            logging_fwa.info('Assistents statistics is parsing...')
+            logging_fwa.info('Парсинг статистики голевых передач...')
             # Находим годы проведения сезона
             req = requests.get(assists_url)
-            soup = BeautifulSoup(req.text, 'html.parser')
+            soup = BeautifulSoup(req.text, 'lxml')
             season = soup.find('a', attrs={'selected': 'selected'}).text.strip()
 
             # Парсим таблицу ассистентов
-            src = pd.read_html(assists_url, encoding='utf-8')
+            src = read_html(assists_url, encoding='utf-8')
             assists_table = src[1].drop(['М', 'Г', 'Пен', 'Г+П'], axis=1)
 
             cursor = connection.cursor()
@@ -34,7 +35,7 @@ class Command(BaseCommand):
                 for index, row in assists_table.iterrows():
                     team, created = Teams.objects.get_or_create(name=row['Команда'])
                     if created:
-                        logging_fwa.info(f"New team {row['Команда']} is added to the Teams table.")
+                        logging_fwa.info(f"Новая команда - {row['Команда']} добавлена в таблицу Teams.")
 
                     model = AssistentsEPL()
                     model.position = row['Unnamed: 0']
@@ -47,4 +48,4 @@ class Command(BaseCommand):
         # Ссылка на статистику сезона 22/23
         assists_url = 'https://www.sports.ru/epl/bombardiers/?&s=goal_passes&d=1&season=270059'
         assists_parsing(assists_url)
-        logging_fwa.info('Assistents statistics DONE!')
+        logging_fwa.info('Парсинг статистики голевых передач завершен!')

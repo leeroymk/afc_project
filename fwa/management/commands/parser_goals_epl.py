@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import lxml
 import logging
 from pandas import read_html
 import requests
@@ -18,7 +19,7 @@ class Command(BaseCommand):
 
         def goals_parsing(goals_url):
 
-            logging_fwa.info('Goalscorers statistics is parsing...')
+            logging_fwa.info('Парсинг статистики бомбардиров...')
 
             # Находим годы проведения сезона
             req = requests.get(goals_url)
@@ -37,7 +38,7 @@ class Command(BaseCommand):
                 for index, row in goals_table.iterrows():
                     team, created = Teams.objects.get_or_create(name=row['Команда'])
                     if created:
-                        logging_fwa.info(f"New team {row['Команда']} is added to the Teams table.")
+                        logging_fwa.info(f"Новая команда - {row['Команда']} добавлена в таблицу Teams.")
 
                     model = GoalscorersEPL()
                     model.position = row['№']
@@ -48,6 +49,5 @@ class Command(BaseCommand):
                     model.save()
 
         goals_url = 'http://fapl.ru/topscorers/'
-
         goals_parsing(goals_url)
-        logging_fwa.info('Goalscorers statistics DONE!')
+        logging_fwa.info('Парсинг статистики бомбардиров завершен!')
