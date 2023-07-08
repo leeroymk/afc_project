@@ -72,8 +72,7 @@ class Command(BaseCommand):
                             add_logo(team_name, team_url)
                             add_tag(team_name, team_url)
                             return team_url, team_name
-            else:
-                return logging_fwa.warning('Следующий соперник не определен!')
+            logging_fwa.warning('Следующий соперник не определен!')
 
         def next_rival_data(calendar_url):
             # Парсим новости следующего соперника
@@ -87,7 +86,7 @@ class Command(BaseCommand):
                     except TimeoutException as te:
                         logging_fwa.error(f'Поймали {te}, пробуем еще раз')
                         continue
-            return logging_fwa.warning('Новостей по следующему сопернику нет!')
+            logging_fwa.warning('Новостей по следующему сопернику нет!')
 
         def add_logo(team_name, team_url):
             # Парсим ссылку на логотип
@@ -99,13 +98,10 @@ class Command(BaseCommand):
 
             if not Teams.objects.get(name=team_name).logo:
                 logging_fwa.info(f'Добавляем ссылку на логотип {team_name}')
-                logo_db = Teams(
-                    name=team_name,
-                    url=team_url,
-                    logo=logo,
-                )
-                logo_db.save()
-            return logging_fwa.info(f'Ссылка на логотип {team_name} уже существует в БД')
+                Teams(name=team_name, url=team_url, logo=logo,).save()
+                logging_fwa.info(f'Ссылка на логотип {team_name} добавлена в БД')
+                return
+            logging_fwa.info(f'Ссылка на логотип {team_name} уже существует в БД')
 
         def add_tag(team_name, team_url):
             # Добавляем тэг
@@ -113,13 +109,10 @@ class Command(BaseCommand):
             tag_team = team_url.replace('https://m.sports.ru', '').strip('/')
             if not Teams.objects.get(name=team_name).tag:
                 logging_fwa.info(f'Добавляем тэг {team_name}')
-                tag_db = Teams(
-                    name=team_name,
-                    url=team_url,
-                    tag=tag_team,
-                )
-                tag_db.save()
-            return logging_fwa.info(f'Тэг {team_name} уже существует в БД')
+                Teams(name=team_name, url=team_url, tag=tag_team).save()
+                logging_fwa.info(f'Тэг {team_name} добавлен в БД')
+            logging_fwa.info(f'Тэг {team_name} уже существует в БД')
+            return
 
         def timetyper(parsed):
             parsed = parsed.lower()
@@ -170,6 +163,8 @@ class Command(BaseCommand):
                 team_name = team.find('a').text
                 team_url = team.find('a')['href']
                 teams_urls[team_name] = team_url
+                add_logo(team_name, team_url)
+                add_tag(team_name, team_url)
             return teams_urls
 
         # Скроллим страницу
@@ -210,13 +205,7 @@ class Command(BaseCommand):
                 if created:
                     logging_fwa.info(f'Новая команда {team_name} добавлена в таблицу Teams.')
                 if not News.objects.filter(source=url_res):
-                    bnew_db = News(
-                        date=timetyper(time_news),
-                        team=team,
-                        title=title,
-                        source=url_res,
-                        )
-                    bnew_db.save()
+                    News(date=timetyper(time_news), team=team, title=title, source=url_res).save()
                     blog_counter += 1
             logging_fwa.info(f'{blog_counter} блоговых новостей добавлены для команды {team_name}')
             short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
@@ -240,12 +229,7 @@ class Command(BaseCommand):
                     if created:
                         logging_fwa.info(f'Новая команда {team_name} добавлена в таблицу Teams.')
                     if not News.objects.filter(source=url_res):
-                        snew_db = News(
-                            date=timetyper(news_exact_time),
-                            team=team,
-                            title=title,
-                            source=url_res)
-                        snew_db.save()
+                        News(date=timetyper(news_exact_time), team=team, title=title, source=url_res).save()
                         short_counter += 1
             logging_fwa.info(f'{short_counter} коротких новостей добавлены для команды {team_name}')
 
