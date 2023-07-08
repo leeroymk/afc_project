@@ -21,15 +21,12 @@
           <label for="team_name">Choose your team:</label>
         </div>
         <div style="float: left" class="px-2">
-          <select class="form-control form-control-sm" id="team_name" name="team_name">
+          <select class="form-control form-control-sm" id="team_name" name="team_name" onchange="this.form.submit()">
             <option selected>Current team is {{ team_1.name }}</option>
             {% for team in teams %}
               <option>{{ team.name }}</option>
             {% endfor %}
           </select>
-        </div>
-        <div style="float: left" class="px-2">
-          <input type="submit" value="Submit">
         </div>
       </form>
     </div>
