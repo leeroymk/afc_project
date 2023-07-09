@@ -37,16 +37,13 @@ class Command(BaseCommand):
 
         def timetyper(parsed):
             parsed = parsed.lower()
+            actual_date = None
             if 'назад' in parsed:
-                return datetime.now() - timedelta(minutes=int(parsed.split()[0]))
+                actual_date = datetime.now() - timedelta(minutes=int(parsed.split()[0]))
             elif 'сегодня' in parsed:
-                d = datetime.now().day
-                m = datetime.now().month
-                y = datetime.now().year
+                actual_date = datetime.now()
             elif 'вчера' in parsed:
-                d = (datetime.now() - timedelta(days=1)).day
-                m = (datetime.now() - timedelta(days=1)).month
-                y = (datetime.now() - timedelta(days=1)).year
+                actual_date = datetime.now() - timedelta(days=1)
             else:
                 mdict = {
                     'янв': '01',
@@ -66,9 +63,15 @@ class Command(BaseCommand):
 
                 d = f'0{parsed.split()[0]}'[-2:]
                 m = mdict[parsed.split()[1][:3]]
-                y = datetime.now().year
+                if len(parsed.split()) == 3:
+                    y = datetime.now().year
+                else:
+                    y = parsed.split()[2][:4]
+                t = parsed.split()[-1]
 
-            t = parsed.split()[-1]
+            if actual_date:
+                d, m, y = actual_date.day, actual_date.month, actual_date.year
+                t = datetime.strftime(actual_date, "%H:%M")
 
             return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
 
