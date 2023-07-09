@@ -31,14 +31,14 @@ class Command(BaseCommand):
             src = read_html(goals_url)
             goals_table = src[0]
 
-            cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
-
             with transaction.atomic():
+                cursor = connection.cursor()
+                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
+
                 for index, row in goals_table.iterrows():
                     team, created = Teams.objects.get_or_create(name=row['Команда'])
                     if created:
-                        logging_fwa.info(f"Новая команда - {row['Команда']} добавлена в таблицу Teams.")
+                        logging_fwa.info(f"Новая команда - {team.name} добавлена в таблицу Teams.")
 
                     model = GoalscorersEPL()
                     model.position = row['№']

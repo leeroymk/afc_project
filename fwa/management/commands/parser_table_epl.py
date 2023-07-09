@@ -23,14 +23,14 @@ class Command(BaseCommand):
             src = read_html(table_url, encoding='utf-8')
             table_data = src[1]
 
-            cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
-
             with transaction.atomic():
+                cursor = connection.cursor()
+                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
+
                 for index, row in table_data.iterrows():
                     team, created = Teams.objects.get_or_create(name=row['Команда'])
                     if created:
-                        logging.info(f"New team {row['Команда']} is added to the Teams table.")
+                        logging.info(f"Новая команда {team.name} занесена в БД")
 
                     model = StatEpl()
                     model.position = row['Unnamed: 0']

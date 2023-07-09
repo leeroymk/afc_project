@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import lxml
 from pandas import read_html
 
-from fwa.models import CalendarMatches
+from fwa.models import CalendarMatches, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
@@ -30,16 +30,18 @@ class Command(BaseCommand):
             src = read_html(calendar_url, encoding='utf-8')
             calendar_table = src[1].drop(['Unnamed: 5', 'Зрители'], axis=1)
 
-            # Чистим данные таблицы
-            cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
-
             with transaction.atomic():
+                cursor = connection.cursor()
+                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
+
                 for index, row in calendar_table.iterrows():
+                    opposite_team, created = Teams.objects.get_or_create(name=row['Соперник'])
+                    if created:
+                        logging_fwa.info(f"Новая команда - {opposite_team.name} добавлена в таблицу Teams.")
                     model = CalendarMatches()
                     model.date_match = datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M')
                     model.tournament = row['Турнир']
-                    model.opposite_team = row['Соперник']
+                    model.opposite_team = opposite_team.name
                     model.place_match = row['Unnamed: 3']
                     model.match_score = row['Счет']
                     model.season = season

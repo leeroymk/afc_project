@@ -28,14 +28,14 @@ class Command(BaseCommand):
             src = read_html(assists_url, encoding='utf-8')
             assists_table = src[1].drop(['М', 'Г', 'Пен', 'Г+П'], axis=1)
 
-            cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistentsEPL._meta.db_table))
-
             with transaction.atomic():
+                cursor = connection.cursor()
+                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistentsEPL._meta.db_table))
+
                 for index, row in assists_table.iterrows():
                     team, created = Teams.objects.get_or_create(name=row['Команда'])
                     if created:
-                        logging_fwa.info(f"Новая команда - {row['Команда']} добавлена в таблицу Teams.")
+                        logging_fwa.info(f"Новая команда - {team.name} добавлена в таблицу Teams.")
 
                     model = AssistentsEPL()
                     model.position = row['Unnamed: 0']
