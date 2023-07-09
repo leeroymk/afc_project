@@ -67,11 +67,11 @@ class Command(BaseCommand):
                     y = datetime.now().year
                 else:
                     y = parsed.split()[2][:4]
+                t = parsed.split()[-1]
 
             if actual_date:
                 d, m, y = actual_date.day, actual_date.month, actual_date.year
-
-            t = parsed.split()[-1]
+                t = datetime.strftime(actual_date, "%H:%M")
 
             return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
 
