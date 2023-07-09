@@ -104,12 +104,20 @@
           <tbody>
               <tr class="border border-left-0 border-dark">
                 <td class="px-1 small">
-                  {{ stats_1.team.name }} is on the {{ stats_1.position }} position with {{ stats_1.matches }} matches played. W/L/D: {{ stats_1.win }}/{{ stats_1.loss }}/{{ stats_1.draw }}
-                </td>
+                  {% if stats_1 %}
+                    {{ stats_1.team.name }} is on the {{ stats_1.position }} position with {{ stats_1.matches }} matches played. W/L/D: {{ stats_1.win }}/{{ stats_1.loss }}/{{ stats_1.draw }}
+                  {% else %}
+                    {{ team_1.name }} не имеет статистики матчей в данном турнире в выбранном  сезоне
+                  {%  endif %}
+                  </td>
               </tr>
               <tr class="border border-left-0 border-dark">
                 <td class="px-1 small">
-                  {{ stats_2.team.name }} is on the {{ stats_2.position }} position with {{ stats_2.matches }} matches played. W/L/D: {{ stats_2.win }}/{{ stats_2.loss }}/{{ stats_2.draw }}
+                  {% if stats_2 %}
+                    {{ stats_2.team.name }} is on the {{ stats_2.position }} position with {{ stats_2.matches }} matches played. W/L/D: {{ stats_2.win }}/{{ stats_2.loss }}/{{ stats_2.draw }}
+                  {% else %}
+                    {{ team_2.name }} не имеет статистики матчей в данном турнире в выбранном  сезоне
+                  {%  endif %}
                 </td>
               </tr>
           </tbody>
