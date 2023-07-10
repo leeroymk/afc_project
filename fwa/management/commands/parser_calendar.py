@@ -5,6 +5,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 import lxml
 from pandas import read_html
+from fwa.management.commands.req_fun import process_timer
 
 from fwa.models import CalendarMatches, Teams
 from django.core.management.base import BaseCommand
@@ -17,7 +18,9 @@ logging_fwa = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Parse calendar'
 
+    @process_timer
     def handle(self, *args, **options):
+
         def calendar_parsing(calendar_url):
 
             logging_fwa.info('Парсинг календаря ближайших встреч...')

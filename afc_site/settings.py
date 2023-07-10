@@ -135,7 +135,8 @@ LOGGING = {
             "datefmt": "%Y-%m-%d %H:%M:%S"
         },
         "brief": {
-            "format": "[%(asctime)s] %(message)s"
+            "format": "[%(asctime)s] %(message)s",
+            "datefmt": "%H:%M:%S"
         }
     },
     "handlers": {

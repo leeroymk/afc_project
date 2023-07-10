@@ -2,6 +2,8 @@ from django.core import management
 from django.core.management.base import BaseCommand
 import logging
 
+from fwa.management.commands.req_fun import process_timer
+
 
 class Command(BaseCommand):
     help = 'Master parser command'
@@ -9,6 +11,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         pass
 
+    @process_timer
     def handle(self, *args, **options):
 
         logging_fwa = logging.getLogger(__name__)

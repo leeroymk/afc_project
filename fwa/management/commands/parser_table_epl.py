@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import lxml
 import logging
 import requests
+from fwa.management.commands.req_fun import process_timer
 
 from fwa.models import StatEpl, Teams
 from django.core.management.base import BaseCommand
@@ -15,6 +16,7 @@ logging_fwa = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Parse table'
 
+    @process_timer
     def handle(self, *args, **options):
 
         logging_fwa.info('Парсинг таблицы АПЛ...')

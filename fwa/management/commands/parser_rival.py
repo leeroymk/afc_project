@@ -1,12 +1,11 @@
 import logging
 import requests
-from datetime import datetime
 
 from bs4 import BeautifulSoup
 import lxml
 from selenium.common.exceptions import TimeoutException
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import add_logo, add_tag, add_name_url, selenium_scroller
+from fwa.management.commands.req_fun import add_logo, add_tag, add_name_url, process_timer, selenium_scroller
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -19,8 +18,9 @@ class Command(BaseCommand):
         parser.add_argument('pages_qty', action='store', nargs='?', default=10, type=int)
         parser.add_argument('timeout_timer', action='store', nargs='?', default=60, type=int)
 
+    @process_timer
     def handle(self, *args, **options):
-        start = datetime.now()
+
         logging_fwa.info('Парсинг следующего соперника стартовал...')
 
         def next_rival_data(calendar_url):
@@ -64,10 +64,5 @@ class Command(BaseCommand):
         # Парсим данные по следующему сопернику
         calendar_url = 'https://www.sports.ru/arsenal/calendar/2023-2024/'
         next_rival_data(calendar_url)
-
-        finish = datetime.now()
-        rival_parse_time = finish-start
-        res_time = rival_parse_time.total_seconds()
-        logging_fwa.info(f'Время парсинга: {res_time} секунд!')
 
         logging_fwa.info('Парсинг данных следующего соперника успешно завершен!')

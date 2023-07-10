@@ -3,6 +3,7 @@ import lxml
 import logging
 from pandas import read_html
 import requests
+from fwa.management.commands.req_fun import process_timer
 
 from fwa.models import GoalscorersEPL, Teams
 from django.core.management.base import BaseCommand
@@ -15,6 +16,7 @@ logging_fwa = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Parse goals'
 
+    @process_timer
     def handle(self, *args, **options):
 
         def goals_parsing(goals_url):

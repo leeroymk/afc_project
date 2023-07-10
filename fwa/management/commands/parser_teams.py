@@ -1,11 +1,10 @@
-from datetime import datetime
 import logging
 import requests
 
 from bs4 import BeautifulSoup
 import lxml
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import add_logo, add_name_url, add_tag
+from fwa.management.commands.req_fun import add_logo, add_name_url, add_tag, process_timer
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -17,9 +16,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         pass
 
+    @process_timer
     def handle(self, *args, **options):
 
-        start = datetime.now()
         logging_fwa.info('Наполнение БД с данными команд...')
 
         # Получаем список команд лиги и ссылки
@@ -41,7 +40,3 @@ class Command(BaseCommand):
         get_teams_data(teams_table_page)
 
         logging_fwa.info('Наполнение БД с данными команд завершено!')
-        finish = datetime.now()
-        teams_parse_time = finish - start
-        res_time = teams_parse_time.total_seconds()
-        logging_fwa.info(f'Время парсинга: {res_time} секунд!')

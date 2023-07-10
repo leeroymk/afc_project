@@ -1,12 +1,11 @@
 from collections import defaultdict
 import logging
 import requests
-from datetime import datetime
 
 from bs4 import BeautifulSoup
 import lxml
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import selenium_scroller
+from fwa.management.commands.req_fun import process_timer, selenium_scroller
 from selenium.common.exceptions import TimeoutException
 
 
@@ -20,10 +19,10 @@ class Command(BaseCommand):
         parser.add_argument('pages_qty', action='store', nargs='?', default=10, type=int)
         parser.add_argument('timeout_timer', action='store', nargs='?', default=60, type=int)
 
+    @process_timer
     def handle(self, *args, **options):
 
         logging_fwa.info('Парсинг новостей стартовал...')
-        start_news_parsing = datetime.now()
 
         pages_qty = options['pages_qty']
         timeout_timer = options['timeout_timer']
@@ -67,9 +66,4 @@ class Command(BaseCommand):
         else:
             logging_fwa.error('Что-то пошло не по плану...')
 
-        finish_news_parsing = datetime.now()
-        news_parse_time = finish_news_parsing-start_news_parsing
-        res_time = news_parse_time.total_seconds()
-
         logging_fwa.info('Парсинг новостй успешно завершен!')
-        logging_fwa.info(f'Время парсинга: {res_time} секунд!')

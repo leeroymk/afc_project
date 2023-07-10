@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import logging
+import time
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
@@ -69,7 +70,7 @@ def selenium_scroller(team_url, team_name):
         chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
         browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()),
                                    options=chrome_options)
-        browser.set_page_load_timeout(60)
+        browser.set_page_load_timeout(30)
         browser.get(team_url)
 
         for i in range(5):
@@ -164,3 +165,13 @@ def timetyper(parsed):
     t = parsed.split()[-1]
 
     return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
+
+
+def process_timer(fun):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        fun(*args, **kwargs)
+        finish = time.time()
+        res_time = round((finish - start), 1)
+        logging_fwa.info(f'Время парсинга составило {res_time} секунд!')
+    return wrapper
