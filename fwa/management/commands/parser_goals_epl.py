@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from datetime import datetime
 import logging
 from pandas import read_html
 import requests
@@ -49,5 +50,5 @@ class Command(BaseCommand):
 
         goals_url = 'http://fapl.ru/topscorers/'
 
-        goals_parsing(goals_url)
-        logging_fwa.info('Goalscorers statistics DONE!')
+        goals_parsing(goals_url + '?season=17')
+        logging_fwa.info('Goalscorers statistics is DONE!')

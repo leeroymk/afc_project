@@ -98,7 +98,7 @@
         <table class="w-100">
           <thead class="border-right border-bottom border-dark">
             <tr>
-              <th class="px-1">Rivals <a href="{% url 'stats-page' %}?team_name={{ team_1.name }}">statistics</a></th>
+              <th class="px-1">Rivals <a href="{% url 'stats-page' %}?team_name={{ team_1.name }}">statistics for {{ season}} season</a></th>
             </tr>
           </thead>
           <tbody>
@@ -120,6 +120,104 @@
                   {%  endif %}
                 </td>
               </tr>
+          </tbody>
+        </table>
+        <table class="w-100">
+          <thead class="border-right border-bottom border-dark">
+            <tr>
+              <th class="px-1">Rivals <a href="{% url 'goalscorers-page' %}?team_name={{ team_1.name }}">best goalscorers of {{ season }} season</a></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border border-left-0 border-dark">
+              <td class="px-1 small">
+                {{ team_1.name }}
+              </td>
+            </tr>
+            {% if goalscorers_1 %}
+              {% for goalscorer in goalscorers_1 %}
+                <tr class="border border-left-0 border-dark">
+                  <td class="px-1 small">
+                    {{ goalscorer.player }} is on the {{ goalscorer.position }} position with {{ goalscorer.goals }} goals scored
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small">
+                  {{ team_1.name }} does not have any players in top-50 goalscorers
+                </td>
+              </tr>
+            {%  endif %}
+            <tr class="border border-left-0 border-dark">
+              <td class="px-1 small">
+                {{ team_2.name }}
+              </td>
+            </tr>
+            {% if goalscorers_2 %}
+            {% for goalscorer in goalscorers_2 %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small">
+                  {{ goalscorer.player }} is on the {{ goalscorer.position }} position with {{ goalscorer.goals }} goals scored
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="border border-left-0 border-dark">
+              <td class="px-1 small">
+                {{ team_2.name }} does not have any players in top-50 goalscorers
+              </td>
+            </tr>
+          {%  endif %}
+          </tbody>
+        </table>
+        <table class="w-100">
+          <thead class="border-right border-bottom border-dark">
+            <tr>
+              <th class="px-1">Rivals <a href="{% url 'assistents-page' %}?team_name={{ team_1.name }}">best assistents of {{ season }} season</a></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border border-left-0 border-dark">
+              <td class="px-1 small">
+                {{ team_1.name }}
+              </td>
+            </tr>
+            {% if assistents_1 %}
+              {% for assistent in assistents_1 %}
+                <tr class="border border-left-0 border-dark">
+                  <td class="px-1 small">
+                    {{ assistent.player }} is on the {{ assistent.position }} position with {{ assistent.assists }} goals scored
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small">
+                  {{ team_1.name }} does not have any players in top-50 assistents
+                </td>
+              </tr>
+            {%  endif %}
+            <tr class="border border-left-0 border-dark">
+              <td class="px-1 small">
+                {{ team_2.name }}
+              </td>
+            </tr>
+            {% if assistents_2 %}
+            {% for assistent in assistents_2 %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small">
+                  {{ assistent.player }} is on the {{ assistent.position }} position with {{ assistent.assists }} goals scored
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="border border-left-0 border-dark">
+              <td class="px-1 small">
+                {{ team_2.name }} does not have any players in top-50 assistents
+              </td>
+            </tr>
+          {%  endif %}
           </tbody>
         </table>
       </div>
