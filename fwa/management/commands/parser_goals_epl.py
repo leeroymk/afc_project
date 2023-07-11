@@ -16,9 +16,9 @@ logging_fwa = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Parse goals'
 
-    @process_timer
     def handle(self, *args, **options):
 
+        @process_timer
         def goals_parsing(goals_url):
 
             logging_fwa.info('Парсинг статистики бомбардиров...')
@@ -38,18 +38,18 @@ class Command(BaseCommand):
                 cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
 
                 for index, row in goals_table.iterrows():
-                    team, created = Teams.objects.get_or_create(name=row['Команда'])
-                    if created:
-                        logging_fwa.info(f"Новая команда - {team.name} добавлена в таблицу Teams.")
+                    GoalscorersEPL.objects.create(
+                        position=row['№'],
+                        player=row['Имя'],
+                        team=Teams.objects.get(name=row['Команда']),
+                        goals=row['Голов'].split()[0],
+                        season=season
+                        )
+        # Демонстрационная таблица (сезон 2022/2023 завершился)
+        goals_url = 'http://fapl.ru/topscorers/?season=17'
 
-                    model = GoalscorersEPL()
-                    model.position = row['№']
-                    model.player = row['Имя']
-                    model.team = team
-                    model.goals = row['Голов'].split()[0]
-                    model.season = season
-                    model.save()
+        # Актуальная таблица для парсинга
+        # goals_url = 'http://fapl.ru/topscorers/'
 
-        goals_url = 'http://fapl.ru/topscorers/'
         goals_parsing(goals_url)
         logging_fwa.info('Парсинг статистики бомбардиров завершен!')

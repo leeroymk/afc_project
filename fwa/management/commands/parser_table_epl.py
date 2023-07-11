@@ -16,11 +16,11 @@ logging_fwa = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Parse table'
 
-    @process_timer
     def handle(self, *args, **options):
 
         logging_fwa.info('Парсинг таблицы АПЛ...')
 
+        @process_timer
         def epl_table_parsing(table_url, season):
             src = read_html(table_url, encoding='utf-8')
             table_data = src[1]
@@ -30,22 +30,18 @@ class Command(BaseCommand):
                 cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
 
                 for index, row in table_data.iterrows():
-                    team, created = Teams.objects.get_or_create(name=row['Команда'])
-                    if created:
-                        logging.info(f"Новая команда {team.name} занесена в БД")
-
-                    model = StatEpl()
-                    model.position = row['Unnamed: 0']
-                    model.team = team
-                    model.matches = row['М']
-                    model.win = row['В']
-                    model.draw = row['Н']
-                    model.loss = row['П']
-                    model.scored = row['Заб']
-                    model.conceded = row['Проп']
-                    model.points = row['О']
-                    model.season = season
-                    model.save()
+                    StatEpl.objects.create(
+                        position=row['Unnamed: 0'],
+                        team=Teams.objects.get(name=row['Команда']),
+                        matches=row['М'],
+                        win=row['В'],
+                        draw=row['Н'],
+                        loss=row['П'],
+                        scored=row['Заб'],
+                        conceded=row['Проп'],
+                        points=row['О'],
+                        season=season
+                    )
 
         def year_parser(table_url):
             req = requests.get(table_url)
@@ -54,11 +50,12 @@ class Command(BaseCommand):
             season = selected[1].text
             return season
 
+        # Демонстрационная таблица (сезон 2022/2023 завершился)
+        table_url = 'https://www.sports.ru/epl/table/?s=270059&sub=table'
+
         # Актуальная таблица для парсинга
         # table_url = 'https://www.sports.ru/epl/table/'
 
-        # Демонстрационная таблица (сезон 2022/2023 завершился)
-        table_url = 'https://www.sports.ru/epl/table/?s=270059&sub=table'
         season = year_parser(table_url)
         epl_table_parsing(table_url, season)
 

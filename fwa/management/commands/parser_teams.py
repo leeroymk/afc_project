@@ -16,12 +16,12 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         pass
 
-    @process_timer
     def handle(self, *args, **options):
 
         logging_fwa.info('Наполнение БД с данными команд...')
 
         # Получаем список команд лиги и ссылки
+        @process_timer
         def get_teams_data(teams_table_site):
             logging_fwa.info('Наполняем БД клубами АПЛ и ссылками на их страницы')
             req = requests.get(teams_table_site)

@@ -16,9 +16,8 @@ logging_fwa = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Parse assists'
 
-    @process_timer
     def handle(self, *args, **options):
-
+        @process_timer
         def assists_parsing(assists_url):
 
             logging_fwa.info('Парсинг статистики голевых передач...')
@@ -36,19 +35,19 @@ class Command(BaseCommand):
                 cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistentsEPL._meta.db_table))
 
                 for index, row in assists_table.iterrows():
-                    team, created = Teams.objects.get_or_create(name=row['Команда'])
-                    if created:
-                        logging_fwa.info(f"Новая команда - {team.name} добавлена в таблицу Teams.")
+                    AssistentsEPL.objects.create(
+                        position=row['Unnamed: 0'],
+                        player=row['Имя'],
+                        team=Teams.objects.get(name=row['Команда']),
+                        assists=row['П'],
+                        season=season
+                        )
 
-                    model = AssistentsEPL()
-                    model.position = row['Unnamed: 0']
-                    model.player = row['Имя']
-                    model.team = team
-                    model.assists = row['П']
-                    model.season = season
-                    model.save()
-
-        # Ссылка на статистику сезона 22/23
+        # Демонстрационная таблица (сезон 2022/2023 завершился)
         assists_url = 'https://www.sports.ru/epl/bombardiers/?&s=goal_passes&d=1&season=270059'
+
+        # Актуальная таблица для парсинга
+        # assists_url = 'https://www.sports.ru/epl/bombardiers/'
+
         assists_parsing(assists_url)
         logging_fwa.info('Парсинг статистики голевых передач завершен!')

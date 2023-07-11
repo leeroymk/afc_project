@@ -18,9 +18,9 @@ logging_fwa = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Parse calendar'
 
-    @process_timer
     def handle(self, *args, **options):
 
+        @process_timer
         def calendar_parsing(calendar_url):
 
             logging_fwa.info('Парсинг календаря ближайших встреч...')
@@ -38,17 +38,14 @@ class Command(BaseCommand):
                 cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
 
                 for index, row in calendar_table.iterrows():
-                    opposite_team, created = Teams.objects.get_or_create(name=row['Соперник'])
-                    if created:
-                        logging_fwa.info(f"Новая команда - {opposite_team.name} добавлена в таблицу Teams.")
-                    model = CalendarMatches()
-                    model.date_match = datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M')
-                    model.tournament = row['Турнир']
-                    model.opposite_team = opposite_team.name
-                    model.place_match = row['Unnamed: 3']
-                    model.match_score = row['Счет']
-                    model.season = season
-                    model.save()
+                    CalendarMatches.objects.create(
+                        date_match=datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M'),
+                        tournament=row['Турнир'],
+                        opposite_team=Teams.objects.get(name=row['Соперник']),
+                        place_match=row['Unnamed: 3'],
+                        match_score=row['Счет'],
+                        season=season
+                        )
 
         calendar_url = 'https://www.sports.ru/arsenal/calendar/'
         calendar_parsing(calendar_url)

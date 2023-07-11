@@ -7,7 +7,7 @@ class TestConnection(TestCase):
     def setUp(self):
         self.client = Client()
 
-    if Teams.objects.first():
+    if Teams.objects.exists():
 
         # Тест соединения с главной страницей
         def test_index_page(self):

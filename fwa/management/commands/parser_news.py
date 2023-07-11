@@ -16,8 +16,8 @@ class Command(BaseCommand):
     help = 'Parse news'
 
     def add_arguments(self, parser):
-        parser.add_argument('pages_qty', action='store', nargs='?', default=10, type=int)
-        parser.add_argument('timeout_timer', action='store', nargs='?', default=60, type=int)
+        parser.add_argument('pages_qty', action='store', nargs='?', default=2, type=int)
+        parser.add_argument('timeout_timer', action='store', nargs='?', default=70, type=int)
 
     @process_timer
     def handle(self, *args, **options):
@@ -56,13 +56,12 @@ class Command(BaseCommand):
                 for number in range(5):
                     try:
                         logging_fwa.info(f'Попытка парсинга новостей команды {team_name} {number + 1} из 5')
-                        selenium_scroller(team_url, team_name)
+                        selenium_scroller(team_url, team_name, pages_qty, timeout_timer)
                         break
                     except TimeoutException as te:
                         logging_fwa.error(f'Поймали {te}\nПробуем еще раз...')
                         continue
-                    finally:
-                        logging_fwa.info(f'Парсинг новостей команды {team_name} завершен успешно!')
+                logging_fwa.info(f'Парсинг новостей команды {team_name} завершен!')
         else:
             logging_fwa.error('Что-то пошло не по плану...')
 

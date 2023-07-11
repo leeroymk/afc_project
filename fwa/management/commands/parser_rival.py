@@ -15,13 +15,16 @@ class Command(BaseCommand):
     help = 'Next rival news'
 
     def add_arguments(self, parser):
-        parser.add_argument('pages_qty', action='store', nargs='?', default=10, type=int)
-        parser.add_argument('timeout_timer', action='store', nargs='?', default=60, type=int)
+        parser.add_argument('pages_qty', action='store', nargs='?', default=5, type=int)
+        parser.add_argument('timeout_timer', action='store', nargs='?', default=70, type=int)
 
     @process_timer
     def handle(self, *args, **options):
 
         logging_fwa.info('Парсинг следующего соперника стартовал...')
+
+        pages_qty = options['pages_qty']
+        timeout_timer = options['timeout_timer']
 
         def next_rival_data(calendar_url):
             rival = db_rival_data(calendar_url)
@@ -30,11 +33,13 @@ class Command(BaseCommand):
             team_name = rival[1]
             for number in range(3):
                 try:
+                    logging_fwa.info(f'Парсер ищет на {pages_qty} страницах')
+                    logging_fwa.info(f'Таймер ожидания установлен на {timeout_timer} секунд')
                     logging_fwa.info(f'Попытка парсинга новостей следующего соперника {number + 1} из 3')
-                    selenium_scroller(team_url, team_name)
+                    selenium_scroller(team_url, team_name, pages_qty, timeout_timer)
                     break
                 except TimeoutException as te:
-                    logging_fwa.error(f'Поймали {te}!\nПробуем еще раз...')
+                    logging_fwa.error(f'Поймали {te}\nПробуем еще раз...')
                     continue
 
         # Заносим в БД информацию о следующем сопернике

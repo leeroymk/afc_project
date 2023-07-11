@@ -59,7 +59,7 @@ class AssistentsEPL(models.Model):
 class CalendarMatches(models.Model):
     date_match = models.DateTimeField()
     tournament = models.CharField(max_length=50)
-    opposite_team = models.CharField(max_length=50)
+    opposite_team = models.ForeignKey(Teams, on_delete=models.CASCADE)
     place_match = models.CharField(max_length=10)
     match_score = models.CharField(max_length=10)
     season = models.CharField(max_length=15)
