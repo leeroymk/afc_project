@@ -35,15 +35,20 @@ class Command(BaseCommand):
 
         start_news_parsing = datetime.now()
 
-        def timetyper(parsed):
-            parsed = parsed.lower()
-            actual_date = None
-            if 'назад' in parsed:
-                actual_date = datetime.now() - timedelta(minutes=int(parsed.split()[0]))
-            elif 'сегодня' in parsed:
+        def timetyper(parsed_time):
+            parsed_time = parsed_time.lower()
+            if 'назад' in parsed_time:
+                actual_date = datetime.now() - timedelta(minutes=int(parsed_time.split()[0]))
+                d, m, y = actual_date.day, actual_date.month, actual_date.year
+                t = datetime.strftime(actual_date, "%H:%M")
+            elif 'сегодня' in parsed_time:
                 actual_date = datetime.now()
-            elif 'вчера' in parsed:
+                d, m, y = actual_date.day, actual_date.month, actual_date.year
+                t = parsed_time.split()[-1]
+            elif 'вчера' in parsed_time:
                 actual_date = datetime.now() - timedelta(days=1)
+                d, m, y = actual_date.day, actual_date.month, actual_date.year
+                t = parsed_time.split()[-1]
             else:
                 mdict = {
                     'янв': '01',
@@ -61,17 +66,13 @@ class Command(BaseCommand):
                     'дек': '12'
                 }
 
-                d = f'0{parsed.split()[0]}'[-2:]
-                m = mdict[parsed.split()[1][:3]]
-                if len(parsed.split()) == 3:
+                d = f'0{parsed_time.split()[0]}'[-2:]
+                m = mdict[parsed_time.split()[1][:3]]
+                if len(parsed_time.split()) == 3:
                     y = datetime.now().year
                 else:
-                    y = parsed.split()[2][:4]
-                t = parsed.split()[-1]
-
-            if actual_date:
-                d, m, y = actual_date.day, actual_date.month, actual_date.year
-                t = datetime.strftime(actual_date, "%H:%M")
+                    y = parsed_time.split()[2][:4]
+                t = parsed_time.split()[-1]
 
             return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
 
