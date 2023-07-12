@@ -3,9 +3,11 @@ import requests
 from datetime import datetime
 
 from bs4 import BeautifulSoup
+import lxml
 from pandas import read_html
+from fwa.management.commands.req_fun import process_timer
 
-from fwa.models import CalendarMatches
+from fwa.models import CalendarMatches, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
@@ -17,9 +19,12 @@ class Command(BaseCommand):
     help = 'Parse calendar'
 
     def handle(self, *args, **options):
+
+        @process_timer
+        @transaction.atomic
         def calendar_parsing(calendar_url):
 
-            logging_fwa.info('Calendar is parsing...')
+            logging_fwa.info('Парсинг календаря ближайших встреч...')
             # Находим годы проведения сезона
             req = requests.get(calendar_url)
             soup = BeautifulSoup(req.text, 'lxml')
@@ -29,21 +34,24 @@ class Command(BaseCommand):
             src = read_html(calendar_url, encoding='utf-8')
             calendar_table = src[1].drop(['Unnamed: 5', 'Зрители'], axis=1)
 
-            # Чистим данные таблицы
+            # Очищаем таблицу, рестарт присвоения ID
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
 
-            with transaction.atomic():
-                for index, row in calendar_table.iterrows():
-                    model = CalendarMatches()
-                    model.date_match = datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M')
-                    model.tournament = row['Турнир']
-                    model.opposite_team = row['Соперник']
-                    model.place_match = row['Unnamed: 3']
-                    model.match_score = row['Счет']
-                    model.season = season
-                    model.save()
+            for index, row in calendar_table.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Соперник'])
+                if created:
+                    logging.info(f"Новая команда {team.name} добавлена в БД.")
+
+                CalendarMatches.objects.create(
+                    date_match=datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M'),
+                    tournament=row['Турнир'],
+                    place_match=row['Unnamed: 3'],
+                    match_score=row['Счет'],
+                    season=season,
+                    team=team
+                    )
 
         calendar_url = 'https://www.sports.ru/arsenal/calendar/'
         calendar_parsing(calendar_url)
-        logging_fwa.info('Calendar parsing DONE!')
+        logging_fwa.info('Парсинг календаря ближайших встреч завершен!')
