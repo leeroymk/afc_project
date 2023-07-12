@@ -8,7 +8,7 @@ def index(request):
     else:
         team_1 = Teams.objects.get(name='Арсенал')
 
-    team_2 = Teams.objects.get(name='Челси')
+    team_2 = CalendarMatches.objects.filter(match_score='превью').order_by('date_match').first().team
     qty = 5
     season = '2022/2023'
 
@@ -36,7 +36,7 @@ def index(request):
 
 def news(request):
     team_1 = Teams.objects.get(name=request.GET['team_name'])
-    team_2 = Teams.objects.get(name='Челси')
+    team_2 = CalendarMatches.objects.filter(match_score='превью').order_by('date_match').first()
     qty = 25
 
     context = {
@@ -52,7 +52,7 @@ def news(request):
 def stats(request):
     season = '2022/2023'
     team_1 = Teams.objects.get(name=request.GET['team_name'])
-    team_2 = Teams.objects.get(name='Челси')
+    team_2 = CalendarMatches.objects.filter(match_score='превью').order_by('date_match').first()
 
     context = {
         'season': season,
@@ -67,7 +67,7 @@ def stats(request):
 def goalscorers(request):
     season = '2022/2023'
     team_1 = Teams.objects.get(name=request.GET['team_name'])
-    team_2 = Teams.objects.get(name='Челси')
+    team_2 = CalendarMatches.objects.filter(match_score='превью').order_by('date_match').first()
 
     context = {
         'season': season,
@@ -82,7 +82,7 @@ def goalscorers(request):
 def assistents(request):
     season = '2022/2023'
     team_1 = Teams.objects.get(name=request.GET['team_name'])
-    team_2 = Teams.objects.get(name='Челси')
+    team_2 = CalendarMatches.objects.filter(match_score='превью').order_by('date_match').first()
 
     context = {
         'season': season,
