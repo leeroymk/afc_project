@@ -40,6 +40,8 @@ class Command(BaseCommand):
 
             for index, row in calendar_table.iterrows():
                 team, created = Teams.objects.get_or_create(name=row['Соперник'])
+                if created:
+                    logging.info(f"Новая команда {team.name} добавлена в БД.")
 
                 CalendarMatches.objects.create(
                     date_match=datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M'),

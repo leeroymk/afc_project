@@ -39,6 +39,9 @@ class Command(BaseCommand):
 
             for index, row in goals_table.iterrows():
                 team, created = Teams.objects.get_or_create(name=row['Команда'])
+                if created:
+                    logging.info(f"Новая команда {team.name} добавлена в БД.")
+
                 GoalscorersEPL.objects.create(
                     position=row['№'],
                     player=row['Имя'],
