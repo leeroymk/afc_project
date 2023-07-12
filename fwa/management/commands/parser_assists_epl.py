@@ -3,7 +3,7 @@ import lxml
 import logging
 from pandas import read_html
 import requests
-from fwa.management.commands.req_fun import add_logo, add_tag, process_timer
+from fwa.management.commands.req_fun import process_timer
 
 from fwa.models import AssistentsEPL, Teams
 from django.core.management.base import BaseCommand
