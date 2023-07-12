@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
+import lxml
 import logging
 from pandas import read_html
 import requests
+from fwa.management.commands.req_fun import process_timer
 
 from fwa.models import GoalscorersEPL, Teams
 from django.core.management.base import BaseCommand
@@ -16,9 +18,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        @process_timer
+        @transaction.atomic
         def goals_parsing(goals_url):
 
-            logging_fwa.info('Goalscorers statistics is parsing...')
+            logging_fwa.info('Парсинг статистики бомбардиров...')
 
             # Находим годы проведения сезона
             req = requests.get(goals_url)
@@ -30,24 +34,27 @@ class Command(BaseCommand):
             src = read_html(goals_url)
             goals_table = src[0]
 
+            # Очищаем таблицу, рестарт присвоения ID
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
 
-            with transaction.atomic():
-                for index, row in goals_table.iterrows():
-                    team, created = Teams.objects.get_or_create(name=row['Команда'])
-                    if created:
-                        logging_fwa.info(f"New team {row['Команда']} is added to the Teams table.")
+            for index, row in goals_table.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Команда'])
+                if created:
+                    logging.info(f"Новая команда {team.name} добавлена в БД.")
 
-                    model = GoalscorersEPL()
-                    model.position = row['№']
-                    model.player = row['Имя']
-                    model.team = team
-                    model.goals = row['Голов'].split()[0]
-                    model.season = season
-                    model.save()
+                GoalscorersEPL.objects.create(
+                    position=row['№'],
+                    player=row['Имя'],
+                    team=team,
+                    goals=row['Голов'].split()[0],
+                    season=season
+                    )
+        # Демонстрационная таблица (сезон 2022/2023 завершился)
+        goals_url = 'http://fapl.ru/topscorers/?season=17'
 
-        goals_url = 'http://fapl.ru/topscorers/'
+        # Актуальная таблица для парсинга
+        # goals_url = 'http://fapl.ru/topscorers/'
 
         goals_parsing(goals_url)
-        logging_fwa.info('Goalscorers statistics DONE!')
+        logging_fwa.info('Парсинг статистики бомбардиров завершен!')
