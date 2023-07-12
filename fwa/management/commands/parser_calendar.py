@@ -34,7 +34,7 @@ class Command(BaseCommand):
             src = read_html(calendar_url, encoding='utf-8')
             calendar_table = src[1].drop(['Unnamed: 5', 'Зрители'], axis=1)
 
-            # Очищаем таблицу
+            # Очищаем таблицу, рестарт присвоения ID
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
 

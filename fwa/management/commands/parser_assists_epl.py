@@ -32,6 +32,7 @@ class Command(BaseCommand):
             src = read_html(assists_url, encoding='utf-8')
             assists_table = src[1].drop(['М', 'Г', 'Пен', 'Г+П'], axis=1)
 
+            # Очищаем таблицу, рестарт присвоения ID
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistentsEPL._meta.db_table))
 

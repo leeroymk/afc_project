@@ -10,6 +10,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 from fwa.models import News, Teams
@@ -18,6 +20,7 @@ from fwa.models import News, Teams
 logging_fwa = logging.getLogger(__name__)
 
 
+# Счетчик работы функции
 def process_timer(fun):
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -28,6 +31,7 @@ def process_timer(fun):
     return wrapper
 
 
+# Обработчик времени
 def timetyper(parsed_time):
     parsed_time = parsed_time.lower()
     if 'назад' in parsed_time:
@@ -69,6 +73,7 @@ def timetyper(parsed_time):
     return datetime.strptime(' '.join(map(str, [d, m, y, t])), "%d %m %Y %H:%M")
 
 
+# Добавляем имя и ссылку на страницу в БД
 def add_name_url(team_url, team_name):
     # Добавляем в БД название команды
     if not Teams.objects.filter(name=team_name):
@@ -87,6 +92,7 @@ def add_name_url(team_url, team_name):
         logging_fwa.info(f'Ссылка на страницу {team_name} уже существует в БД')
 
 
+# Добавляем лого в БД
 def add_logo(team_url, team_name):
     # Парсим ссылку на логотип
     if not Teams.objects.get(name=team_name).logo:
@@ -101,6 +107,7 @@ def add_logo(team_url, team_name):
         logging_fwa.info(f'Ссылка на логотип {team_name} уже существует в БД')
 
 
+# Добавляем тэг в БД
 def add_tag(team_url, team_name):
     if not Teams.objects.get(name=team_name).tag:
         # Добавляем тэг
@@ -112,6 +119,7 @@ def add_tag(team_url, team_name):
         logging_fwa.info(f'Тэг {team_name} уже существует в БД')
 
 
+# Прокрутчик страницы
 @process_timer
 def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
     logging_fwa.info(f'Прокручиваем страницу {team_url}')
@@ -122,11 +130,12 @@ def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
         service=Service(ChromeDriverManager().install()),
         options=chrome_options)
     browser.set_page_load_timeout(timeout_timer)
+    wait = WebDriverWait(browser, 10)
     browser.get(team_url)
-
     for i in range(pages_qty):
-        logging_fwa.info(f'Клик номер {i+1}')
         btn_xpath = '//button[(contains(@class,"b-tag-lenta__show-more-button")) and(contains(text(),"Показать еще"))]'
+        wait.until(EC.visibility_of_element_located((By.XPATH, btn_xpath)))
+        logging_fwa.info(f'Клик номер {i+1}')
         more_btn = browser.find_element(By.XPATH, btn_xpath)
         browser.execute_script("arguments[0].click();", more_btn)
     # Передаем в парсер новостей прокрученную страницу

@@ -34,6 +34,7 @@ class Command(BaseCommand):
             src = read_html(goals_url)
             goals_table = src[0]
 
+            # Очищаем таблицу, рестарт присвоения ID
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
 

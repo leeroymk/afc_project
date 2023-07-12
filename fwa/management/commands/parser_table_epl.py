@@ -23,9 +23,11 @@ class Command(BaseCommand):
         @process_timer
         @transaction.atomic
         def epl_table_parsing(table_url, season):
+            # Парсим таблицу АПЛ
             src = read_html(table_url, encoding='utf-8')
             table_data = src[1]
 
+            # Очищаем таблицу, рестарт присвоения ID
             cursor = connection.cursor()
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
 

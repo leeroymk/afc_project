@@ -31,6 +31,7 @@ class Command(BaseCommand):
             for team in teams_data:
                 team_name = team.find('a').text
                 team_url = team.find('a')['href']
+                # Добавляем имя, ссылку на страницу, лого и тэк в БД
                 add_name_url(team_url, team_name)
                 add_logo(team_url, team_name)
                 add_tag(team_url, team_name)
