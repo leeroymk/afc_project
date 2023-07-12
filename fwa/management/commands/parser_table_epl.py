@@ -21,27 +21,28 @@ class Command(BaseCommand):
         logging_fwa.info('Парсинг таблицы АПЛ...')
 
         @process_timer
+        @transaction.atomic
         def epl_table_parsing(table_url, season):
             src = read_html(table_url, encoding='utf-8')
             table_data = src[1]
 
-            with transaction.atomic():
-                cursor = connection.cursor()
-                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
+            cursor = connection.cursor()
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
 
-                for index, row in table_data.iterrows():
-                    StatEpl.objects.create(
-                        position=row['Unnamed: 0'],
-                        team=Teams.objects.get(name=row['Команда']),
-                        matches=row['М'],
-                        win=row['В'],
-                        draw=row['Н'],
-                        loss=row['П'],
-                        scored=row['Заб'],
-                        conceded=row['Проп'],
-                        points=row['О'],
-                        season=season
-                    )
+            for index, row in table_data.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Команда'])
+                StatEpl.objects.create(
+                    position=row['Unnamed: 0'],
+                    team=team,
+                    matches=row['М'],
+                    win=row['В'],
+                    draw=row['Н'],
+                    loss=row['П'],
+                    scored=row['Заб'],
+                    conceded=row['Проп'],
+                    points=row['О'],
+                    season=season
+                )
 
         def year_parser(table_url):
             req = requests.get(table_url)

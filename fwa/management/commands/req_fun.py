@@ -3,6 +3,7 @@ import logging
 import time
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+from django.db import OperationalError
 
 import requests
 from selenium import webdriver
@@ -137,48 +138,54 @@ def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
 # Процесс парсинга новостей
 @process_timer
 def get_team_news(scrolled_page, team_name):
-    logging_fwa.info(f'Парсим новости команды {team_name}...')
-    soup = BeautifulSoup(scrolled_page, 'lxml')
-    blog_news = soup.find_all(class_='b-tag-lenta__item m-type_blog')
-    blog_counter = 0
-    for bnew in blog_news:
-        time_news = timetyper(bnew.find(class_='b-tag-lenta__item-details').text)
-        title = bnew.find('h2').text
-        url = bnew.find('a')['href'].replace('//m.', '//')
-        url_parsed = urlparse(url)
-        url_res = f'{url_parsed.scheme}://{url_parsed.netloc}{url_parsed.path}'
-        if title is None:
-            logging_fwa.warning(f'Заголовок пустой. Url: {url}\n')
-            continue
-        team_q = Teams.objects.get(name=team_name)
-        if not News.objects.filter(source=url_res).exists():
-            News.objects.create(date=time_news, team=team_q, title=title, source=url_res)
-            blog_counter += 1
-            logging_fwa.info(f'Добавленая блоговая новость {url_res}')
-        else:
-            logging_fwa.info('DEBUG blog')
-    logging_fwa.info(f'{blog_counter} блоговых новостей добавлены для команды {team_name}')
-    short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
-    short_counter = 0
-    for snew in short_news:
-        time_date = snew.find(class_='b-tag-lenta__item-details').text.strip()
-        time_hours = snew.find_all(class_='b-tag-lenta__item-news-item')
-        for element in time_hours:
-            exact_time = element.find('time').text
-            news_exact_time = f'{time_date}, {exact_time}'
-            title = element.find('h2').text
-            url = element.find('a')['href'].replace('//m.', '//')
+    try:
+        logging_fwa.info(f'Парсим новости команды {team_name}...')
+        soup = BeautifulSoup(scrolled_page, 'lxml')
+        blog_news = soup.find_all(class_='b-tag-lenta__item m-type_blog')
+        blog_counter = 0
+        for bnew in blog_news:
+            time_news = timetyper(bnew.find(class_='b-tag-lenta__item-details').text)
+            title = bnew.find('h2').text
+            url = bnew.find('a')['href'].replace('//m.', '//')
             url_parsed = urlparse(url)
             url_res = f'{url_parsed.scheme}://{url_parsed.netloc}{url_parsed.path}'
             if title is None:
                 logging_fwa.warning(f'Заголовок пустой. Url: {url}\n')
                 continue
-            # team_q = Teams.objects.get(name=team_name)
+            team_q = Teams.objects.get(name=team_name)
             if not News.objects.filter(source=url_res).exists():
-                News.objects.create(date=timetyper(news_exact_time), team=team_q, title=title, source=url_res)
-                short_counter += 1
+                News.objects.create(
+                    date=time_news,
+                    team=team_q,
+                    title=title,
+                    source=url_res)
+                blog_counter += 1
                 logging_fwa.info(f'Добавленая блоговая новость {url_res}')
-            else:
-                logging_fwa.info('DEBUG short')
-
-    logging_fwa.info(f'{short_counter} коротких новостей добавлены для команды {team_name}')
+        logging_fwa.info(f'{blog_counter} блоговых новостей добавлены для команды {team_name}')
+        short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
+        short_counter = 0
+        for snew in short_news:
+            time_date = snew.find(class_='b-tag-lenta__item-details').text.strip()
+            time_hours = snew.find_all(class_='b-tag-lenta__item-news-item')
+            for element in time_hours:
+                exact_time = element.find('time').text
+                news_exact_time = timetyper(f'{time_date}, {exact_time}')
+                title = element.find('h2').text
+                url = element.find('a')['href'].replace('//m.', '//')
+                url_parsed = urlparse(url)
+                url_res = f'{url_parsed.scheme}://{url_parsed.netloc}{url_parsed.path}'
+                if title is None:
+                    logging_fwa.warning(f'Заголовок пустой. Url: {url}\n')
+                    continue
+                if not News.objects.filter(source=url_res).exists():
+                    News.objects.create(
+                        date=news_exact_time,
+                        team=team_q,
+                        title=title,
+                        source=url_res)
+                    short_counter += 1
+                    logging_fwa.info(f'Добавленая блоговая новость {url_res}')
+        logging_fwa.info(f'{short_counter} коротких новостей добавлены для команды {team_name}')
+    except OperationalError as doe:
+        logging_fwa.error(f'Поймали {doe}\nПробуем еще раз')
+        time.sleep(1)

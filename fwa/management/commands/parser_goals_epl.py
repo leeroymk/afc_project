@@ -19,6 +19,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         @process_timer
+        @transaction.atomic
         def goals_parsing(goals_url):
 
             logging_fwa.info('Парсинг статистики бомбардиров...')
@@ -33,18 +34,18 @@ class Command(BaseCommand):
             src = read_html(goals_url)
             goals_table = src[0]
 
-            with transaction.atomic():
-                cursor = connection.cursor()
-                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
+            cursor = connection.cursor()
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(GoalscorersEPL._meta.db_table))
 
-                for index, row in goals_table.iterrows():
-                    GoalscorersEPL.objects.create(
-                        position=row['№'],
-                        player=row['Имя'],
-                        team=Teams.objects.get(name=row['Команда']),
-                        goals=row['Голов'].split()[0],
-                        season=season
-                        )
+            for index, row in goals_table.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Команда'])
+                GoalscorersEPL.objects.create(
+                    position=row['№'],
+                    player=row['Имя'],
+                    team=team,
+                    goals=row['Голов'].split()[0],
+                    season=season
+                    )
         # Демонстрационная таблица (сезон 2022/2023 завершился)
         goals_url = 'http://fapl.ru/topscorers/?season=17'
 

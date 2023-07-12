@@ -21,6 +21,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         @process_timer
+        @transaction.atomic
         def calendar_parsing(calendar_url):
 
             logging_fwa.info('Парсинг календаря ближайших встреч...')
@@ -33,19 +34,21 @@ class Command(BaseCommand):
             src = read_html(calendar_url, encoding='utf-8')
             calendar_table = src[1].drop(['Unnamed: 5', 'Зрители'], axis=1)
 
-            with transaction.atomic():
-                cursor = connection.cursor()
-                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
+            # Очищаем таблицу
+            cursor = connection.cursor()
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(CalendarMatches._meta.db_table))
 
-                for index, row in calendar_table.iterrows():
-                    CalendarMatches.objects.create(
-                        date_match=datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M'),
-                        tournament=row['Турнир'],
-                        opposite_team=Teams.objects.get(name=row['Соперник']),
-                        place_match=row['Unnamed: 3'],
-                        match_score=row['Счет'],
-                        season=season
-                        )
+            for index, row in calendar_table.iterrows():
+                team, created = Teams.objects.get_or_create(name=row['Соперник'])
+
+                CalendarMatches.objects.create(
+                    date_match=datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M'),
+                    tournament=row['Турнир'],
+                    place_match=row['Unnamed: 3'],
+                    match_score=row['Счет'],
+                    season=season,
+                    team=team
+                    )
 
         calendar_url = 'https://www.sports.ru/arsenal/calendar/'
         calendar_parsing(calendar_url)
