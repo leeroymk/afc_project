@@ -16,60 +16,62 @@
   <body>
     <a href="{% url 'index-page' %}?team_name={{ team_1.name }}">Go back to main page</a>
     <h2>Statistics page for season {{ season }}</h2>
-    <table>
-      <thead class="border border-dark">
-        <tr>
-          <th class="px-1 text-center">Position</th>
-          <th  class="px-1 text-center border-left border-dark">Team</th>
-          <th  class="px-1 text-center border-left border-dark">Matches</th>
-          <th  class="px-1 text-center border-left border-dark">Win</th>
-          <th  class="px-1 text-center border-left border-dark">Loss</th>
-          <th  class="px-1 text-center border-left border-dark">Draw</th>
-          <th  class="px-1 text-center border-left border-dark">Scored</th>
-          <th  class="px-1 text-center border-left border-dark">Conceded</th>
-          <th  class="px-1 text-center border-left border-dark">Points</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for stat in stats %}
-          {% if stat.team.name == team_1.name %}
-            <tr class="border border-dark table-warning">
-          {% elif stat.team.name == team_2.name %}
-            <tr class="border border-dark table-info">
-          {% else %}
-            <tr class="border border-dark">
-          {% endif %}          
-            <td class="px-1 text-center small">
-              {{ stat.position }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.team.name }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.matches }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.win }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.loss }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.draw }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.scored }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.conceded }}
-            </td>
-            <td class="px-1 text-center align-middle small border-left border-dark">
-              {{ stat.points }}
-            </td>
+    <div class="row justify-content-center">
+      <table>
+        <thead class="border border-dark">
+          <tr>
+            <th class="px-1 text-center">Position</th>
+            <th  class="px-1 text-center border-left border-dark">Team</th>
+            <th  class="px-1 text-center border-left border-dark">Matches</th>
+            <th  class="px-1 text-center border-left border-dark">Win</th>
+            <th  class="px-1 text-center border-left border-dark">Loss</th>
+            <th  class="px-1 text-center border-left border-dark">Draw</th>
+            <th  class="px-1 text-center border-left border-dark">Scored</th>
+            <th  class="px-1 text-center border-left border-dark">Conceded</th>
+            <th  class="px-1 text-center border-left border-dark">Points</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for stat in stats %}
+            {% if stat.team == team_1 %}
+              <tr class="border border-dark table-warning">
+            {% elif stat.team == team_2 %}
+              <tr class="border border-dark table-info">
+            {% else %}
+              <tr class="border border-dark">
+            {% endif %}
+              <td class="px-1 text-center small">
+                {{ stat.position }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.team.name }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.matches }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.win }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.loss }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.draw }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.scored }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.conceded }}
+              </td>
+              <td class="px-1 text-center align-middle small border-left border-dark">
+                {{ stat.points }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </body>
 </div>
 </html>
