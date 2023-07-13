@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import lxml
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import add_logo, add_name_url, add_tag, process_timer
+from fwa.management.commands.req_fun import add_logo, add_name_url, add_slug, process_timer
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -31,10 +31,10 @@ class Command(BaseCommand):
             for team in teams_data:
                 team_name = team.find('a').text
                 team_url = team.find('a')['href']
-                # Добавляем имя, ссылку на страницу, лого и тэк в БД
+                # Добавляем имя, ссылку на страницу, лого и тэг в БД
                 add_name_url(team_url, team_name)
                 add_logo(team_url, team_name)
-                add_tag(team_url, team_name)
+                add_slug(team_url, team_name)
 
         # Наполняем данные по командам АПЛ
         teams_table_page = 'https://m.sports.ru/epl/table/'
