@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import lxml
 from selenium.common.exceptions import TimeoutException
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import add_logo, add_tag, add_name_url, process_timer, selenium_scroller
+from fwa.management.commands.req_fun import add_logo, add_slug, add_name_url, process_timer, selenium_scroller
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('pages_qty', action='store', nargs='?', default=5, type=int)
-        parser.add_argument('timeout_timer', action='store', nargs='?', default=40, type=int)
+        parser.add_argument('timeout_timer', action='store', nargs='?', default=70, type=int)
 
     @process_timer
     def handle(self, *args, **options):
@@ -27,20 +27,24 @@ class Command(BaseCommand):
         timeout_timer = options['timeout_timer']
 
         def next_rival_data(calendar_url):
+            exception_counter = 0
             rival = db_rival_data(calendar_url)
             # Парсим новости и наполняем ДБ по следующему сопернику
             team_url = rival[0]
             team_name = rival[1]
             for number in range(3):
                 try:
-                    logging_fwa.info(f'Парсер ищет на {pages_qty} страницах')
+                    logging_fwa.info(f'Парсер ищет на {pages_qty+1} страницах')
                     logging_fwa.info(f'Таймер ожидания установлен на {timeout_timer} секунд')
                     logging_fwa.info(f'Попытка парсинга новостей следующего соперника {number + 1} из 3')
                     selenium_scroller(team_url, team_name, pages_qty, timeout_timer)
                     break
                 except TimeoutException as te:
+                    exception_counter += 1
                     logging_fwa.error(f'Поймали {te}\nПробуем еще раз...')
                     continue
+            logging_fwa.info(f'Общее время простоя из-за ошибок составило {exception_counter*timeout_timer} сек')
+            logging_fwa.info('Парсинг новостей успешно завершен!')
 
         # Заносим в БД информацию о следующем сопернике
         def db_rival_data(calendar_url):
@@ -62,7 +66,7 @@ class Command(BaseCommand):
                             logging_fwa.info(f'Следующий соперник - {team_name}')
                             add_name_url(team_url, team_name)
                             add_logo(team_url, team_name)
-                            add_tag(team_url, team_name)
+                            add_slug(team_url, team_name)
                             return team_url, team_name
             logging_fwa.warning('Следующий соперник не определен!')
 

@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('pages_qty', action='store', nargs='?', default=2, type=int)
-        parser.add_argument('timeout_timer', action='store', nargs='?', default=40, type=int)
+        parser.add_argument('timeout_timer', action='store', nargs='?', default=70, type=int)
 
     @process_timer
     def handle(self, *args, **options):
@@ -48,10 +48,11 @@ class Command(BaseCommand):
         # Парсим новости АПЛ
         team_counter = 0
         if teams_urls:
-            logging_fwa.info(f'Парсер ищет на {pages_qty} страницах')
+            logging_fwa.info(f'Парсер ищет на {pages_qty+1} страницах')
             logging_fwa.info(f'Таймер ожидания установлен на {timeout_timer} секунд')
             for team_url, team_name in teams_urls.items():
                 team_counter += 1
+                exception_counter = 0
                 logging_fwa.info(f'{team_name} - это {team_counter} из {len(teams_urls)} команд')
                 for number in range(5):
                     try:
@@ -59,10 +60,11 @@ class Command(BaseCommand):
                         selenium_scroller(team_url, team_name, pages_qty, timeout_timer)
                         break
                     except TimeoutException as te:
+                        exception_counter += 1
                         logging_fwa.error(f'Поймали {te}\nПробуем еще раз...')
                         continue
                 logging_fwa.info(f'Парсинг новостей команды {team_name} завершен!')
         else:
             logging_fwa.error('Что-то пошло не по плану...')
-
-        logging_fwa.info('Парсинг новостй успешно завершен!')
+        timeout_waste = f'Общее время простоя из-за ошибок составило {exception_counter*timeout_timer}'
+        logging_fwa.info(f'Парсинг новостй успешно завершен!\n{timeout_waste} сек')

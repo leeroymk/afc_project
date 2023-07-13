@@ -107,12 +107,12 @@ def add_logo(team_url, team_name):
 
 
 # Добавляем тэг в БД
-def add_tag(team_url, team_name):
-    if not Teams.objects.get(name=team_name).tag:
+def add_slug(team_url, team_name):
+    if not Teams.objects.get(name=team_name).slug:
         # Добавляем тэг
         logging_fwa.info(f'Парсим тэг команды {team_name}')
-        tag_team = team_url.replace('https://m.sports.ru', '').strip('/')
-        Teams.objects.filter(name=team_name).update(tag=tag_team)
+        slug_team = team_url.replace('https://m.sports.ru', '').strip('/')
+        Teams.objects.filter(name=team_name).update(slug=slug_team)
         logging_fwa.info(f'Тэг {team_name} добавлен в БД')
     else:
         logging_fwa.info(f'Тэг {team_name} уже существует в БД')
@@ -129,11 +129,10 @@ def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
         service=Service(ChromeDriverManager().install()),
         options=chrome_options)
     browser.set_page_load_timeout(timeout_timer)
-    wait = WebDriverWait(browser, 10)
     browser.get(team_url)
     for i in range(pages_qty):
         btn_xpath = '//button[(contains(@class,"b-tag-lenta__show-more-button")) and(contains(text(),"Показать еще"))]'
-        wait.until(lambda browser: browser.execute_script('return document.readyState') == 'complete')
+        WebDriverWait(browser, 5).until(lambda browser: browser.execute_script('return document.readyState') == 'complete')
         logging_fwa.info(f'Клик номер {i+1}')
         more_btn = browser.find_element(By.XPATH, btn_xpath)
         browser.execute_script("arguments[0].click();", more_btn)
