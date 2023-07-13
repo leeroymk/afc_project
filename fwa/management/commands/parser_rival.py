@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 import lxml
 from selenium.common.exceptions import TimeoutException
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import add_logo, add_slug, add_name_url, process_timer, selenium_scroller
+
+from fwa.management.commands.req_fun import add_logo, add_slug, add_name_url, process_timer, selenium_scroller, headers
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ class Command(BaseCommand):
         def db_rival_data(calendar_url):
             years = calendar_url.split('/')[-2]
             logging_fwa.info(f'Парсим ссылку и имя следующего соперника. Сезон {years}')
-            req = requests.get(calendar_url)
+            req = requests.get(calendar_url, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             rows = soup.find('table', class_='stat-table').find_all('tr')
             if rows:

@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import lxml
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import process_timer, selenium_scroller
+from fwa.management.commands.req_fun import process_timer, selenium_scroller, headers
 from selenium.common.exceptions import TimeoutException
 
 
@@ -30,7 +30,7 @@ class Command(BaseCommand):
         # Получаем список команд лиги и ссылки
         def get_urls_teams_dict(teams_table_site):
             logging_fwa.info('Получаем список команд лиги и ссылки')
-            req = requests.get(teams_table_site)
+            req = requests.get(teams_table_site, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             teams_list = soup.find_all(class_='b-tag-table__content-team')
             # Добавляем ссылки к ключам-названиям команды

@@ -6,6 +6,7 @@ import requests
 from fwa.management.commands.req_fun import process_timer
 
 from fwa.models import GoalscorersEPL, Teams
+from fwa.management.commands.req_fun import headers
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
@@ -25,7 +26,7 @@ class Command(BaseCommand):
             logging_fwa.info('Парсинг статистики бомбардиров...')
 
             # Находим годы проведения сезона
-            req = requests.get(goals_url)
+            req = requests.get(goals_url, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             selected = soup.find('h3').text.split()[-1].strip().split('/')[0]
             season = f'{selected}/{int(selected)+1}'

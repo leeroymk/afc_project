@@ -3,8 +3,9 @@ import requests
 
 from bs4 import BeautifulSoup
 import lxml
+
 from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import add_logo, add_name_url, add_slug, process_timer
+from fwa.management.commands.req_fun import add_logo, add_name_url, add_slug, process_timer, headers
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class Command(BaseCommand):
         @process_timer
         def get_teams_data(teams_table_site):
             logging_fwa.info('Наполняем БД клубами АПЛ и ссылками на их страницы')
-            req = requests.get(teams_table_site)
+            req = requests.get(teams_table_site, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             teams_data = soup.find_all(class_='b-tag-table__content-team')
 

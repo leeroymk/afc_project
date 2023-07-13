@@ -5,8 +5,8 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 import lxml
 from pandas import read_html
-from fwa.management.commands.req_fun import process_timer
 
+from fwa.management.commands.req_fun import process_timer, headers
 from fwa.models import CalendarMatches, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
             logging_fwa.info(f'Парсинг календаря ближайших встреч для {team_q.name}...')
             # Находим годы проведения сезона
-            req = requests.get(calendar_url)
+            req = requests.get(calendar_url, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             season = soup.find('a', attrs={'selected': 'selected'}).text.strip()
 
@@ -50,8 +50,7 @@ class Command(BaseCommand):
                     match_score=row['Счет'],
                     season=season,
                     team=team_q,
-                    rival=rival
-                    )
+                    rival=rival)
 
         for team_q in Teams.objects.all():
             calendar_url = f'https://www.sports.ru/{team_q.slug}/calendar/'

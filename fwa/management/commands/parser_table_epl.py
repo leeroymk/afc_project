@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 import lxml
 import logging
 import requests
-from fwa.management.commands.req_fun import process_timer
 
+from fwa.management.commands.req_fun import process_timer, headers
 from fwa.models import StatEpl, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 )
 
         def year_parser(table_url):
-            req = requests.get(table_url)
+            req = requests.get(table_url, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             selected = soup.find_all('a', attrs={'selected': 'selected'})
             season = selected[1].text
