@@ -16,7 +16,7 @@
   <body>
     <a href="{% url 'index-page' %}?team_name={{ team_1.name }}">Go back to main page</a>
     <h2>News page</h2>
-    <table>
+    <table class="w-100">
       <thead class="border border-dark">
         <tr>
           <th class="px-1">News {{ team_1.name }}</th>
@@ -31,10 +31,10 @@
             </td>
             <td class="px-1 text-center align-middle small border-left border-dark">
               {% now "d.m.Y" as today %}
-              {% if  today == item.date|date:"d.m.Y" %}
+              {% if  today == item.date|date:"d.m.y" %}
                 {{ item.date|date:"H:i" }}
               {% else %}
-                {{ item.date|date:"d.m.Y" }}
+                {{ item.date|date:"d.m.y" }}
               {% endif %}
             </td>
         </tr>
@@ -42,7 +42,7 @@
       </tbody>
     </table>
     <br>
-    <table>
+    <table class="w-100">
       <thead class="border border-dark">
         <tr>
           <th class="px-1">News {{ team_2.name }}</th>
@@ -57,10 +57,10 @@
             </td>
             <td class="px-1 text-center align-middle small border-left border-dark">
               {% now "d.m.Y" as today %}
-              {% if  today == item.date|date:"d.m.Y" %}
+              {% if  today == item.date|date:"d.m.y" %}
                 {{ item.date|date:"H:i" }}
               {% else %}
-                {{ item.date|date:"d.m.Y" }}
+                {{ item.date|date:"d.m.y" }}
               {% endif %}
             </td>
         </tr>
