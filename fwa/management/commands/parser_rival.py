@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('pages_qty', action='store', nargs='?', default=5, type=int)
-        parser.add_argument('timeout_timer', action='store', nargs='?', default=70, type=int)
+        parser.add_argument('timeout_timer', action='store', nargs='?', default=40, type=int)
 
     @process_timer
     def handle(self, *args, **options):

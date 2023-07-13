@@ -134,7 +134,7 @@ def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
     browser.get(team_url)
     for i in range(pages_qty):
         btn_xpath = '//button[(contains(@class,"b-tag-lenta__show-more-button")) and(contains(text(),"Показать еще"))]'
-        wait.until(EC.visibility_of_element_located((By.XPATH, btn_xpath)))
+        wait.until(lambda browser: browser.execute_script('return document.readyState') == 'complete')
         logging_fwa.info(f'Клик номер {i+1}')
         more_btn = browser.find_element(By.XPATH, btn_xpath)
         browser.execute_script("arguments[0].click();", more_btn)
