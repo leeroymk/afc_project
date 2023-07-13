@@ -25,8 +25,8 @@ def index(request):
         'goalscorers_1': GoalscorersEPL.objects.filter(team=team_1).order_by('position')[:3],
         'goalscorers_2': GoalscorersEPL.objects.filter(team=team_2).order_by('position')[:3],
         'assistents': AssistentsEPL.objects.all(),
-        'assistents_1': AssistentsEPL.objects.filter(team=team_1).order_by('position'),
-        'assistents_2': AssistentsEPL.objects.filter(team=team_2).order_by('position'),
+        'assistents_1': AssistentsEPL.objects.filter(team=team_1).order_by('position')[:3],
+        'assistents_2': AssistentsEPL.objects.filter(team=team_2).order_by('position')[:3],
         'matches': CalendarMatches.objects.all(),
         'teams': Teams.objects.all().order_by('name'),
     }
@@ -92,3 +92,18 @@ def assistents(request):
     }
 
     return render(request, 'fwa/assistents.html', context)
+
+
+def calendar(request):
+    season = '2023/2024'
+    team_1 = Teams.objects.get(name=request.GET['team_name'])
+    team_2 = CalendarMatches.objects.filter(match_score='превью').order_by('date_match').first().team
+
+    context = {
+        'season': season,
+        'calendar': CalendarMatches.objects.filter(team=team_1, season=season).order_by('date_match'),
+        'team_1': team_1,
+        'team_2': team_2,
+    }
+
+    return render(request, 'fwa/calendar.html', context)
