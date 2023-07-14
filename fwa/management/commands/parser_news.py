@@ -4,9 +4,10 @@ import requests
 
 from bs4 import BeautifulSoup
 import lxml
-from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import process_timer, selenium_scroller, headers
 from selenium.common.exceptions import TimeoutException
+
+from django.core.management.base import BaseCommand
+from fwa.management.commands.utils import process_timer, selenium_scroller, headers
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -52,7 +53,6 @@ class Command(BaseCommand):
             logging_fwa.info(f'Таймер ожидания установлен на {timeout_timer} секунд')
             for team_url, team_name in teams_urls.items():
                 team_counter += 1
-                exception_counter = 0
                 logging_fwa.info(f'{team_name} - это {team_counter} из {len(teams_urls)} команд')
                 for number in range(5):
                     try:
@@ -60,11 +60,9 @@ class Command(BaseCommand):
                         selenium_scroller(team_url, team_name, pages_qty, timeout_timer)
                         break
                     except TimeoutException as te:
-                        exception_counter += 1
-                        logging_fwa.error(f'Поймали {te}\nПробуем еще раз...')
+                        logging_fwa.error(f'Поймали {te.msg}\nПробуем еще раз...')
                         continue
                 logging_fwa.info(f'Парсинг новостей команды {team_name} завершен!')
         else:
             logging_fwa.error('Что-то пошло не по плану...')
-        timeout_waste = f'Общее время простоя из-за ошибок составило {exception_counter*timeout_timer}'
-        logging_fwa.info(f'Парсинг новостй успешно завершен!\n{timeout_waste} сек')
+        logging_fwa.info('Парсинг новостй успешно завершен!')

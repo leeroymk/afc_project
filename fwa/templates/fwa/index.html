@@ -211,7 +211,7 @@
         <table class="border border-dark w-100">
           <thead class="border-right border-bottom border-dark">
             <tr>
-              <th class="px-1" colspan="3">Лучшие <a href="{% url 'assistents-page' %}?team_name={{ team_1.name }}">ассистенты сезона {{ season }}</a> в составе команд</th>
+              <th class="px-1" colspan="3">Лучшие <a href="{% url 'assistants-page' %}?team_name={{ team_1.name }}">ассистенты сезона {{ season }}</a> в составе команд</th>
             </tr>
             <tr class="border border-left-0 border-dark">
               <th class="px-1 small"> Команда </th>
@@ -220,11 +220,11 @@
             </tr>
           </thead>
           <tbody>
-            {% if assistents_1 %}
+            {% if assistants_1 %}
               <tr class="border border-left-0 border-dark">
                 <td class="px-1 small" rowspan="4"> {{ team_1.name }} </td>
               </tr>
-              {% for assistent in assistents_1 %}
+              {% for assistent in assistants_1 %}
                 <tr>
                   <td class="px-1 small"> {{ assistent.player }} </td>
                   <td class="px-1 small"> {{ assistent.assists }} </td>
@@ -237,11 +237,11 @@
                 <td class="px-1 small"> - </td>
               </tr>
             {%  endif %}
-            {% if assistents_2 %}
+            {% if assistants_2 %}
               <tr class="border border-left-0 border-dark">
                 <td class="px-1 small" rowspan="4"> {{ team_2.name }} </td>
               </tr>
-              {% for assistent in assistents_2 %}
+              {% for assistent in assistants_2 %}
                 <tr>
                   <td class="px-1 small"> {{ assistent.player }} </td>
                   <td class="px-1 small"> {{ assistent.assists }} </td>

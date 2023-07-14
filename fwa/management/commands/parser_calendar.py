@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import lxml
 from pandas import read_html
 
-from fwa.management.commands.req_fun import process_timer, headers
+from fwa.management.commands.utils import process_timer, headers
 from fwa.models import CalendarMatches, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                     team=team_q,
                     rival=rival)
 
-        for team_q in Teams.objects.all():
+        for team_q in Teams.objects.filter(league='АПЛ'):
             calendar_url = f'https://www.sports.ru/{team_q.slug}/calendar/'
             calendar_parsing(calendar_url, team_q)
             logging_fwa.info(f'Парсинг календаря ближайших встреч для команды {team_q.name} завершен!')

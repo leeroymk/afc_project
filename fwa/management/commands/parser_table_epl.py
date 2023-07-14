@@ -1,10 +1,11 @@
-from pandas import read_html
-from bs4 import BeautifulSoup
-import lxml
 import logging
 import requests
 
-from fwa.management.commands.req_fun import process_timer, headers
+from pandas import read_html
+from bs4 import BeautifulSoup
+import lxml
+
+from fwa.management.commands.utils import process_timer, headers
 from fwa.models import StatEpl, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction

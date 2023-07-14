@@ -4,9 +4,9 @@ import requests
 from bs4 import BeautifulSoup
 import lxml
 from selenium.common.exceptions import TimeoutException
-from django.core.management.base import BaseCommand
 
-from fwa.management.commands.req_fun import add_logo, add_slug, add_name_url, process_timer, selenium_scroller, headers
+from django.core.management.base import BaseCommand
+from fwa.management.commands.utils import add_logo, add_slug, add_name_url, process_timer, selenium_scroller, headers
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -28,7 +28,6 @@ class Command(BaseCommand):
         timeout_timer = options['timeout_timer']
 
         def next_rival_data(calendar_url):
-            exception_counter = 0
             rival = db_rival_data(calendar_url)
             # Парсим новости и наполняем ДБ по следующему сопернику
             team_url = rival[0]
@@ -41,10 +40,8 @@ class Command(BaseCommand):
                     selenium_scroller(team_url, team_name, pages_qty, timeout_timer)
                     break
                 except TimeoutException as te:
-                    exception_counter += 1
-                    logging_fwa.error(f'Поймали {te}\nПробуем еще раз...')
+                    logging_fwa.error(f'Поймали {te.msg}\nПробуем еще раз...')
                     continue
-            logging_fwa.info(f'Общее время простоя из-за ошибок составило {exception_counter*timeout_timer} сек')
             logging_fwa.info('Парсинг новостей успешно завершен!')
 
         # Заносим в БД информацию о следующем сопернике
@@ -54,21 +51,20 @@ class Command(BaseCommand):
             req = requests.get(calendar_url, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             rows = soup.find('table', class_='stat-table').find_all('tr')
-            if rows:
-                for row in rows:
-                    links = row.find_all('a')
-                    hrefs = [url['href'] for url in links]
-                    names = [string.text for string in links]
-                    if hrefs or names:
-                        score_or_preview = names[3].strip()
-                        if score_or_preview == 'превью':
-                            team_url = hrefs[2].replace('/www.', '/m.')
-                            team_name = names[2]
-                            logging_fwa.info(f'Следующий соперник - {team_name}')
-                            add_name_url(team_url, team_name)
-                            add_logo(team_url, team_name)
-                            add_slug(team_url, team_name)
-                            return team_url, team_name
+            for row in rows:
+                links = row.find_all('a')
+                hrefs = [url['href'] for url in links]
+                names = [string.text for string in links]
+                if hrefs or names:
+                    score_or_preview = names[3].strip()
+                    if score_or_preview == 'превью':
+                        team_url = hrefs[2].replace('/www.', '/m.')
+                        team_name = names[2]
+                        logging_fwa.info(f'Следующий соперник - {team_name}')
+                        add_name_url(team_url, team_name)
+                        add_logo(team_url, team_name)
+                        add_slug(team_url, team_name)
+                        return team_url, team_name
             logging_fwa.warning('Следующий соперник не определен!')
 
         # Парсим данные по следующему сопернику
