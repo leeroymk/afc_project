@@ -1,22 +1,20 @@
 from datetime import datetime, timedelta
 import logging
 import time
-import requests
-
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-import lxml
+from django.db import OperationalError
 
-
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 from fwa.models import News, Teams
-from django.db import OperationalError
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -82,16 +80,16 @@ def add_name_url(team_url, team_name):
         logging_fwa.info(f'Парсим название и ссылку на страницу команды {team_name}')
         team_q, created = Teams.objects.get_or_create(name=team_name)
         if created:
-            logging_fwa.debug(f'Новая команда {team_q.name} добавлена в БД.')
+            logging_fwa.info(f'Новая команда {team_q.name} добавлена в БД.')
         else:
-            logging_fwa.debug(f'Команда {team_q.name} уже существует в БД.')
+            logging_fwa.info(f'Команда {team_q.name} уже существует в БД.')
     # Дополняем БД ссылками на страницы клубов
     if not Teams.objects.get(name=team_name).url:
         logging_fwa.info(f'Добавляем ссылку на логотип {team_name}')
         Teams.objects.filter(name=team_name).update(url=team_url)
-        logging_fwa.debug(f'Ссылка на страницу {team_name} добавлена в БД')
+        logging_fwa.info(f'Ссылка на страницу {team_name} добавлена в БД')
     else:
-        logging_fwa.debug(f'Ссылка на страницу {team_name} уже существует в БД')
+        logging_fwa.info(f'Ссылка на страницу {team_name} уже существует в БД')
 
 
 # Добавляем лого в БД
@@ -104,30 +102,21 @@ def add_logo(team_url, team_name):
         logo_soup = soup.find(class_='b-tag-header__tag-image')
         logo_url = logo_soup.img['data-src']
         Teams.objects.filter(name=team_name).update(logo=logo_url)
-        logging_fwa.debug(f'Ссылка на логотип {team_name} добавлена в БД')
+        logging_fwa.info(f'Ссылка на логотип {team_name} добавлена в БД')
     else:
-        logging_fwa.debug(f'Ссылка на логотип {team_name} уже существует в БД')
+        logging_fwa.info(f'Ссылка на логотип {team_name} уже существует в БД')
 
 
 # Добавляем тэг в БД
-def add_slug(team_url, team_name):
-    if not Teams.objects.get(name=team_name).slug:
+def add_tag(team_url, team_name):
+    if not Teams.objects.get(name=team_name).tag:
         # Добавляем тэг
         logging_fwa.info(f'Парсим тэг команды {team_name}')
-        slug_team = team_url.replace('https://m.sports.ru', '').strip('/')
-        Teams.objects.filter(name=team_name).update(slug=slug_team)
-        logging_fwa.debug(f'Тэг {team_name} добавлен в БД')
+        tag_team = team_url.replace('https://m.sports.ru', '').strip('/')
+        Teams.objects.filter(name=team_name).update(tag=tag_team)
+        logging_fwa.info(f'Тэг {team_name} добавлен в БД')
     else:
-        logging_fwa.debug(f'Тэг {team_name} уже существует в БД')
-
-
-def add_league(league_name, team_name):
-    if not Teams.objects.get(name=team_name).league:
-        # Добавляем лигу
-        logging_fwa.info(f'Добавляем название лиги для команды {team_name}')
-        Teams.objects.filter(name=team_name).update(league=league_name)
-    else:
-        logging_fwa.debug(f'Лига {league_name} уже добавлена в БД')
+        logging_fwa.info(f'Тэг {team_name} уже существует в БД')
 
 
 # Прокрутчик страницы
@@ -141,11 +130,12 @@ def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
         service=Service(ChromeDriverManager().install()),
         options=chrome_options)
     browser.set_page_load_timeout(timeout_timer)
+    wait = WebDriverWait(browser, 10)
     browser.get(team_url)
     for i in range(pages_qty):
         btn_xpath = '//button[(contains(@class,"b-tag-lenta__show-more-button")) and(contains(text(),"Показать еще"))]'
-        WebDriverWait(browser, 10).until(lambda browser: browser.execute_script('return document.readyState') == 'complete')
-        logging_fwa.debug(f'Клик номер {i+1}')
+        wait.until(EC.visibility_of_element_located((By.XPATH, btn_xpath)))
+        logging_fwa.info(f'Клик номер {i+1}')
         more_btn = browser.find_element(By.XPATH, btn_xpath)
         browser.execute_script("arguments[0].click();", more_btn)
     # Передаем в парсер новостей прокрученную страницу
@@ -179,8 +169,8 @@ def get_team_news(scrolled_page, team_name):
                     title=title,
                     source=url_res)
                 blog_counter += 1
-                logging_fwa.info(f'Добавлена блоговая новость {url_res}')
-        logging_fwa.debug(f'{blog_counter} блоговых новостей добавлены для команды {team_name}')
+                logging_fwa.info(f'Добавленая блоговая новость {url_res}')
+        logging_fwa.info(f'{blog_counter} блоговых новостей добавлены для команды {team_name}')
         short_news = soup.find_all(class_='b-tag-lenta__item m-type_news')
         short_counter = 0
         for snew in short_news:
@@ -203,8 +193,8 @@ def get_team_news(scrolled_page, team_name):
                         title=title,
                         source=url_res)
                     short_counter += 1
-                    logging_fwa.info(f'Добавлена короткая новость {url_res}')
-        logging_fwa.debug(f'{short_counter} коротких новостей добавлены для команды {team_name}')
+                    logging_fwa.info(f'Добавленая блоговая новость {url_res}')
+        logging_fwa.info(f'{short_counter} коротких новостей добавлены для команды {team_name}')
     except OperationalError as doe:
         logging_fwa.error(f'Поймали {doe}\nПробуем еще раз')
         time.sleep(1)

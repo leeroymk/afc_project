@@ -53,6 +53,7 @@ class Command(BaseCommand):
             logging_fwa.info(f'Таймер ожидания установлен на {timeout_timer} секунд')
             for team_url, team_name in teams_urls.items():
                 team_counter += 1
+                exception_counter = 0
                 logging_fwa.info(f'{team_name} - это {team_counter} из {len(teams_urls)} команд')
                 for number in range(5):
                     try:

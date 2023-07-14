@@ -27,25 +27,25 @@
           </tr>
         </thead>
         <tbody>
-          {% for assistent in assistants %}
-            {% if assistent.team == team_1 %}
+          {% for assistant in assistants %}
+            {% if assistant.team == team_1 %}
               <tr class="border border-dark table-warning">
-            {% elif assistent.team == team_2 %}
+            {% elif assistant.team == team_2 %}
               <tr class="border border-dark table-info">
             {% else %}
               <tr class="border border-dark">
             {% endif %}
               <td class="px-1 text-center small">
-                {{ assistent.position }}
+                {{ assistant.position }}
               </td>
               <td class="px-1 text-center align-middle small border-left border-dark">
-                {{ assistent.assists }}
+                {{ assistant.assists }}
               </td>
               <td class="px-1 text-center align-middle small border-left border-dark">
-                {{ assistent.player }}
+                {{ assistant.player }}
               </td>
               <td class="px-1 text-center align-middle small border-left border-dark">
-                {{ assistent.team.name }}
+                {{ assistant.team.name }}
               </td>
             </tr>
           {% endfor %}
