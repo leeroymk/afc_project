@@ -32,7 +32,7 @@ def index(request):
         'assistants_2': AssistantsEPL.objects.filter(team=team_2).order_by('position')[:3],
         'assistants_2_qty': len(AssistantsEPL.objects.filter(team=team_2).order_by('position')[:3]) + 1,
         'matches': CalendarMatches.objects.all(),
-        'teams': Teams.objects.all().order_by('name'),
+        'teams': Teams.objects.filter(league='АПЛ').order_by('name'),
         'tournament': upcoming_event.tournament,
         'date': upcoming_event.date_match,
     }
