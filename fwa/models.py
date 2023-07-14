@@ -45,7 +45,7 @@ class GoalscorersEPL(models.Model):
         return f'<News: {self.player} has {self.goals} goals>. Season - {self.season}'
 
 
-class AssistentsEPL(models.Model):
+class AssistantsEPL(models.Model):
     position = models.IntegerField()
     player = models.CharField(max_length=50)
     team = models.ForeignKey(Teams, on_delete=models.CASCADE)

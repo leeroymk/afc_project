@@ -5,7 +5,7 @@ from pandas import read_html
 import requests
 from fwa.management.commands.req_fun import process_timer
 
-from fwa.models import AssistentsEPL, Teams
+from fwa.models import AssistantsEPL, Teams
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
@@ -34,13 +34,13 @@ class Command(BaseCommand):
 
             # Очищаем таблицу, рестарт присвоения ID
             cursor = connection.cursor()
-            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistentsEPL._meta.db_table))
+            cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistantsEPL._meta.db_table))
 
             for index, row in assists_table.iterrows():
                 team, created = Teams.objects.get_or_create(name=row['Команда'])
                 if created:
                     logging.info(f"Новая команда {team.name} добавлена в БД.")
-                AssistentsEPL.objects.create(
+                AssistantsEPL.objects.create(
                     position=row['Unnamed: 0'],
                     player=row['Имя'],
                     assists=row['П'],

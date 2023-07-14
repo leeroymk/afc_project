@@ -31,29 +31,30 @@
       <div class="text-right w-50"><a href="{% url 'calendar-page' %}?team_name={{ team_1.name }}">Календарь</a></div>
     </div>
     <div class="row border border-dark" style="min-height: 220px;">
-      <table>
-        <tbody>
+      <table class="w-100">
+        <thead>
           <tr>
             {% if team_1.logo %}
-              <td class="px-5"><img src={{ team_1.logo }} height="200"></td>
+              <th class="px-3" style="width: 25%"><img src={{ team_1.logo }} height="200"></th>
             {% else %}
-              <td class="px-5"><img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc4YhcaWvEqQFSFv0LahokrMBi5UC9rnY33gnNdb4SOg&s height="200"></td>
+              <th class="px-3" style="width: 25%"><img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc4YhcaWvEqQFSFv0LahokrMBi5UC9rnY33gnNdb4SOg&s height="200"></th>
             {% endif %}
-            <td class="align-middle px-5">
-              <h2>{{ team_1.name }} vs {{ team_2.name }}</h2>
-            </td>
+            <th class="align-middle px-3" style="width: 50%">
+              <h2 class="text-center">{{ team_1.name }} vs {{ team_2.name }}</h2>
+              <h6 class="text-center"> {{ tournament }} {{ date }}</h6>
+            </th>
             {% if team_2.logo %}
-              <td class="px-5"><img src={{ team_2.logo }} height="200"></td>
+              <th class="px-3" style="width: 25%"><img src={{ team_2.logo }} height="200"></th>
             {% else %}
-              <td class="px-5"><img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc4YhcaWvEqQFSFv0LahokrMBi5UC9rnY33gnNdb4SOg&s height="200"></td>
+              <th class="px-3" style="width: 25%"><img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc4YhcaWvEqQFSFv0LahokrMBi5UC9rnY33gnNdb4SOg&s height="200"></th>
             {% endif %}
           </tr>
-        </tbody>
+        </thead>
       </table>
     </div>
     <div class="row">
       <div class="col-6 p-0">
-        <table class="w-100">
+        <table class="border border-dark w-100">
           <thead class="border border-top-0 border-dark">
             <tr>
               <th class="px-1"><a href="{% url 'news-page' %}?team_name={{ team_1.name }}">Новости</a> команды {{ team_1.name }}</th>
@@ -119,7 +120,7 @@
         </table>
       </div>
       <div class="col-6 p-0">
-        <table class="w-100">
+        <table class="border border-dark w-100">
           <thead class="border-right border-bottom border-dark">
             <tr>
               <th class="px-1" colspan="4">Положение соперников в <a href="{% url 'stats-page' %}?team_name={{ team_1.name }}">таблице {{ season}} сезона</a></th>
@@ -174,7 +175,7 @@
           <tbody>
             {% if goalscorers_1 %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small" rowspan="4"> {{ team_1.name }} </td>
+                <td class="px-1 small" rowspan="{{ goalscorers_1_qty }}"> {{ team_1.name }} </td>
               </tr>
               {% for goalscorer in goalscorers_1 %}
                 <tr>
@@ -191,7 +192,7 @@
             {%  endif %}
             {% if goalscorers_2 %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small" rowspan="4"> {{ team_2.name }} </td>
+                <td class="px-1 small" rowspan="{{ goalscorers_2_qty }}"> {{ team_2.name }} </td>
               </tr>
               {% for goalscorer in goalscorers_2 %}
                 <tr>
@@ -211,7 +212,7 @@
         <table class="border border-dark w-100">
           <thead class="border-right border-bottom border-dark">
             <tr>
-              <th class="px-1" colspan="3">Лучшие <a href="{% url 'assistents-page' %}?team_name={{ team_1.name }}">ассистенты сезона {{ season }}</a> в составе команд</th>
+              <th class="px-1" colspan="3">Лучшие <a href="{% url 'assistants-page' %}?team_name={{ team_1.name }}">ассистенты сезона {{ season }}</a> в составе команд</th>
             </tr>
             <tr class="border border-left-0 border-dark">
               <th class="px-1 small"> Команда </th>
@@ -220,14 +221,14 @@
             </tr>
           </thead>
           <tbody>
-            {% if assistents_1 %}
+            {% if assistants_1 %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small" rowspan="4"> {{ team_1.name }} </td>
+                <td class="px-1 small" rowspan="{{ assistants_1_qty }}"> {{ team_1.name }} </td>
               </tr>
-              {% for assistent in assistents_1 %}
+              {% for assistant in assistants_1 %}
                 <tr>
-                  <td class="px-1 small"> {{ assistent.player }} </td>
-                  <td class="px-1 small"> {{ assistent.assists }} </td>
+                  <td class="px-1 small"> {{ assistant.player }} </td>
+                  <td class="px-1 small"> {{ assistant.assists }} </td>
                 </tr>
                 {% endfor %}
             {% else %}
@@ -237,14 +238,14 @@
                 <td class="px-1 small"> - </td>
               </tr>
             {%  endif %}
-            {% if assistents_2 %}
+            {% if assistants_2 %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small" rowspan="4"> {{ team_2.name }} </td>
+                <td class="px-1 small" rowspan="{{ assistants_2_qty }}"> {{ team_2.name }} </td>
               </tr>
-              {% for assistent in assistents_2 %}
+              {% for assistant in assistants_2 %}
                 <tr>
-                  <td class="px-1 small"> {{ assistent.player }} </td>
-                  <td class="px-1 small"> {{ assistent.assists }} </td>
+                  <td class="px-1 small"> {{ assistant.player }} </td>
+                  <td class="px-1 small"> {{ assistant.assists }} </td>
                 </tr>
                 {% endfor %}
             {% else %}
