@@ -1,14 +1,14 @@
-from bs4 import BeautifulSoup
-import lxml
 import logging
+
 from pandas import read_html
 import requests
-from fwa.management.commands.req_fun import process_timer
+from bs4 import BeautifulSoup
+import lxml
 
 from fwa.models import AssistantsEPL, Teams
+from fwa.management.commands.utils import headers, process_timer
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
-
 
 logging_fwa = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
             logging_fwa.info('Парсинг статистики голевых передач...')
             # Находим годы проведения сезона
-            req = requests.get(assists_url)
+            req = requests.get(assists_url, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             season = soup.find('a', attrs={'selected': 'selected'}).text.strip()
 
@@ -37,16 +37,13 @@ class Command(BaseCommand):
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(AssistantsEPL._meta.db_table))
 
             for index, row in assists_table.iterrows():
-                team, created = Teams.objects.get_or_create(name=row['Команда'])
-                if created:
-                    logging.info(f"Новая команда {team.name} добавлена в БД.")
+                team = Teams.objects.get(name=row['Команда'])
                 AssistantsEPL.objects.create(
                     position=row['Unnamed: 0'],
                     player=row['Имя'],
                     assists=row['П'],
                     season=season,
-                    team=team
-                    )
+                    team=team)
 
         # Демонстрационная таблица (сезон 2022/2023 завершился)
         assists_url = 'https://www.sports.ru/epl/bombardiers/?&s=goal_passes&d=1&season=270059'

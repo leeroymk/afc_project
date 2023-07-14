@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 from fwa.models import News, Teams
@@ -107,12 +108,12 @@ def add_logo(team_url, team_name):
 
 
 # Добавляем тэг в БД
-def add_slug(team_url, team_name):
-    if not Teams.objects.get(name=team_name).slug:
+def add_tag(team_url, team_name):
+    if not Teams.objects.get(name=team_name).tag:
         # Добавляем тэг
         logging_fwa.info(f'Парсим тэг команды {team_name}')
-        slug_team = team_url.replace('https://m.sports.ru', '').strip('/')
-        Teams.objects.filter(name=team_name).update(slug=slug_team)
+        tag_team = team_url.replace('https://m.sports.ru', '').strip('/')
+        Teams.objects.filter(name=team_name).update(tag=tag_team)
         logging_fwa.info(f'Тэг {team_name} добавлен в БД')
     else:
         logging_fwa.info(f'Тэг {team_name} уже существует в БД')
@@ -129,10 +130,11 @@ def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
         service=Service(ChromeDriverManager().install()),
         options=chrome_options)
     browser.set_page_load_timeout(timeout_timer)
+    wait = WebDriverWait(browser, 10)
     browser.get(team_url)
     for i in range(pages_qty):
         btn_xpath = '//button[(contains(@class,"b-tag-lenta__show-more-button")) and(contains(text(),"Показать еще"))]'
-        WebDriverWait(browser, 5).until(lambda browser: browser.execute_script('return document.readyState') == 'complete')
+        wait.until(EC.visibility_of_element_located((By.XPATH, btn_xpath)))
         logging_fwa.info(f'Клик номер {i+1}')
         more_btn = browser.find_element(By.XPATH, btn_xpath)
         browser.execute_script("arguments[0].click();", more_btn)
@@ -196,3 +198,10 @@ def get_team_news(scrolled_page, team_name):
     except OperationalError as doe:
         logging_fwa.error(f'Поймали {doe}\nПробуем еще раз')
         time.sleep(1)
+
+
+headers = {
+    'Accept': '*/*',
+    'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+}
