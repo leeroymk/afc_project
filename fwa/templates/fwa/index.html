@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
     integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
-  <title>AFC Project</title>
+  <title>Проект AFC</title>
 </head>
 
 <body>
@@ -18,206 +18,242 @@
     <div class="row">
       <form action="/" method="get">
         <div style="float: left" class="px-2">
-          <label for="team_name">Choose your team:</label>
+          <label for="team_name">Выбери команду:</label>
         </div>
         <div style="float: left" class="px-2">
           <select class="form-control form-control-sm" id="team_name" name="team_name" onchange="this.form.submit()">
-            <option selected>Current team is {{ team_1.name }}</option>
             {% for team in teams %}
-              <option>{{ team.name }}</option>
+              <option {% if team.name == team_1.name %} selected {% endif %}>{{ team.name }}</option>
             {% endfor %}
           </select>
         </div>
       </form>
+      <div class="text-right w-50"><a href="{% url 'calendar-page' %}?team_name={{ team_1.name }}">Календарь</a></div>
     </div>
     <div class="row border border-dark" style="min-height: 220px;">
       <table>
         <tbody>
           <tr>
-            <td class="px-5"><img src={{ team_1.logo }} height="200"></td>
+            {% if team_1.logo %}
+              <td class="px-5"><img src={{ team_1.logo }} height="200"></td>
+            {% else %}
+              <td class="px-5"><img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc4YhcaWvEqQFSFv0LahokrMBi5UC9rnY33gnNdb4SOg&s height="200"></td>
+            {% endif %}
             <td class="align-middle px-5">
               <h2>{{ team_1.name }} vs {{ team_2.name }}</h2>
             </td>
-            <td class="px-5"><img src={{ team_2.logo }} height="200"></td>
+            {% if team_2.logo %}
+              <td class="px-5"><img src={{ team_2.logo }} height="200"></td>
+            {% else %}
+              <td class="px-5"><img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc4YhcaWvEqQFSFv0LahokrMBi5UC9rnY33gnNdb4SOg&s height="200"></td>
+            {% endif %}
           </tr>
         </tbody>
       </table>
     </div>
     <div class="row">
-      <div class="col-4 p-0">
-        <table>
+      <div class="col-6 p-0">
+        <table class="w-100">
           <thead class="border border-top-0 border-dark">
             <tr>
-              <th class="px-1"><a href="{% url 'news-page' %}?team_name={{ team_1.name }}">News</a> {{ team_1.name }}</th>
-              <th  class="px-1 text-center border-left border-dark">Date</th>
+              <th class="px-1"><a href="{% url 'news-page' %}?team_name={{ team_1.name }}">Новости</a> команды {{ team_1.name }}</th>
+              <th  class="px-1 text-center border-left border-dark">Дата</th>
             </tr>
           </thead>
           <tbody>
-            {% for item in news_1 %}
-            <tr class="border border-dark">
+            {% if news_1 %}
+              {% for item in news_1 %}
+                <tr class="border border-dark">
+                    <td class="px-1 small">
+                      <a href={{ item.source }}>{{ item.title|slice:"100" }}...</a>
+                    </td>
+                    <td class="px-1 text-center align-middle small border-left border-dark">
+                      {% now "d.m.Y" as today %}
+                      {% if  today == item.date|date:"d.m.y" %}
+                        {{ item.date|date:"H:i" }}
+                      {% else %}
+                        {{ item.date|date:"d.m.y" }}
+                      {% endif %}
+                    </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="border border-dark">
                 <td class="px-1 small">
-                  <a href={{ item.source }}>{{ item.title|slice:"55" }}...</a>
+                  Для команды {{ team_1.name }} новостей не обнаружено
                 </td>
-                <td class="px-1 text-center align-middle small border-left border-dark">
-                  {% now "d.m.Y" as today %}
-                  {% if  today == item.date|date:"d.m.Y" %}
-                    {{ item.date|date:"H:i" }}
-                  {% else %}
-                    {{ item.date|date:"d.m.Y" }}
-                  {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+              </tr>
+            {% endif %}
           </tbody>
           <thead class="border border-dark">
             <tr>
-              <th class="px-1"><a href="{% url 'news-page' %}?team_name={{ team_1.name }}">News</a> {{ team_2.name }}</th>
-              <th class="px-1 text-center border-left border-dark">Date</th>
+              <th class="px-1"><a href="{% url 'news-page' %}?team_name={{ team_1.name }}">Новости</a> команды {{ team_2.name }}</th>
+              <th class="px-1 text-center border-left border-dark">Дата</th>
             </tr>
           </thead>
           <tbody>
-            {% for item in news_2 %}
-            <tr class="border border-dark">
+            {% if news_2 %}
+              {% for item in news_2 %}
+                <tr class="border border-dark">
+                    <td class="px-1 small">
+                      <a href={{ item.source }}>{{ item.title|slice:"100" }}...</a>
+                    </td>
+                    <td class="px-1 text-center align-middle small border-left border-dark">
+                      {% now "d.m.Y" as today %}
+                      {% if  today == item.date|date:"d.m.y" %}
+                        {{ item.date|date:"H:i" }}
+                      {% else %}
+                        {{ item.date|date:"d.m.y" }}
+                      {% endif %}
+                    </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="border border-dark">
                 <td class="px-1 small">
-                  <a href={{ item.source }}>{{ item.title|slice:"55" }}...</a>
+                  Для команды {{ team_2.name }} новостей не обнаружено
                 </td>
-                <td class="px-1 text-center align-middle small border-left border-dark">
-                  {% now "d.m.Y" as today %}
-                  {% if  today == item.date|date:"d.m.Y" %}
-                    {{ item.date|date:"H:i" }}
-                  {% else %}
-                    {{ item.date|date:"d.m.Y" }}
-                  {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+              </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
-      <div class="col-8 p-0">
+      <div class="col-6 p-0">
         <table class="w-100">
           <thead class="border-right border-bottom border-dark">
             <tr>
-              <th class="px-1">Rivals <a href="{% url 'stats-page' %}?team_name={{ team_1.name }}">statistics for {{ season}} season</a></th>
+              <th class="px-1" colspan="4">Положение соперников в <a href="{% url 'stats-page' %}?team_name={{ team_1.name }}">таблице {{ season}} сезона</a></th>
+            </tr>
+            <tr class="border border-left-0 border-dark">
+              <th class="px-1 small"> Команда </th>
+              <th class="px-1 small"> Позиция </th>
+              <th class="px-1 small"> Матчи </th>
+              <th class="px-1 small"> Очки </th>
             </tr>
           </thead>
           <tbody>
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small">
-                  {% if stats_1 %}
-                    {{ stats_1.team.name }} is on the {{ stats_1.position }} position with {{ stats_1.matches }} matches played. W/L/D: {{ stats_1.win }}/{{ stats_1.loss }}/{{ stats_1.draw }}
-                  {% else %}
-                    {{ team_1.name }} не имеет статистики матчей в данном турнире в выбранном  сезоне
-                  {%  endif %}
-                  </td>
+                {% if stats_1 %}
+                  <td class="px-1 small"> {{ team_1.name }} </td>
+                  <td class="px-1 small"> {{ stats_1.position }} </td>
+                  <td class="px-1 small"> {{ stats_1.matches }} </td>
+                  <td class="px-1 small"> {{ stats_1.scored }} </td>
+                {% else %}
+                  <td class="px-1 small"> {{ team_1.name }} </td>
+                  <td class="px-1 small"> - </td>
+                  <td class="px-1 small"> - </td>
+                  <td class="px-1 small"> - </td>
+                {%  endif %}
               </tr>
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small">
-                  {% if stats_2 %}
-                    {{ stats_2.team.name }} is on the {{ stats_2.position }} position with {{ stats_2.matches }} matches played. W/L/D: {{ stats_2.win }}/{{ stats_2.loss }}/{{ stats_2.draw }}
-                  {% else %}
-                    {{ team_2.name }} не имеет статистики матчей в данном турнире в выбранном  сезоне
-                  {%  endif %}
-                </td>
+                {% if stats_2 %}
+                  <td class="px-1 small"> {{ team_2.name }} </td>
+                  <td class="px-1 small"> {{ stats_2.position }} </td>
+                  <td class="px-1 small"> {{ stats_2.matches }} </td>
+                  <td class="px-1 small"> {{ stats_2.scored }} </td>
+                {% else %}
+                  <td class="px-1 small"> {{ team_2.name }} </td>
+                  <td class="px-1 small"> - </td>
+                  <td class="px-1 small"> - </td>
+                  <td class="px-1 small"> - </td>
+                {%  endif %}
               </tr>
           </tbody>
         </table>
-        <table class="w-100">
+        <table class="border border-dark w-100">
           <thead class="border-right border-bottom border-dark">
             <tr>
-              <th class="px-1">Rivals <a href="{% url 'goalscorers-page' %}?team_name={{ team_1.name }}">best goalscorers of {{ season }} season</a></th>
+              <th class="px-1" colspan="3">Лучшие <a href="{% url 'goalscorers-page' %}?team_name={{ team_1.name }}">бомбардиры сезона {{ season }}</a> в составе команд</th>
+            </tr>
+            <tr class="border border-left-0 border-dark">
+              <th class="px-1 small"> Команда </th>
+              <th class="px-1 small"> Бомбардир </th>
+              <th class="px-1 small"> Голы </th>
             </tr>
           </thead>
           <tbody>
-            <tr class="border border-left-0 border-dark">
-              <td class="px-1 small">
-                {{ team_1.name }}
-              </td>
-            </tr>
             {% if goalscorers_1 %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small" rowspan="4"> {{ team_1.name }} </td>
+              </tr>
               {% for goalscorer in goalscorers_1 %}
-                <tr class="border border-left-0 border-dark">
-                  <td class="px-1 small">
-                    {{ goalscorer.player }} is on the {{ goalscorer.position }} position with {{ goalscorer.goals }} goals scored
-                  </td>
+                <tr>
+                  <td class="px-1 small"> {{ goalscorer.player }} </td>
+                  <td class="px-1 small"> {{ goalscorer.goals }} </td>
                 </tr>
-              {% endfor %}
+                {% endfor %}
             {% else %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small">
-                  {{ team_1.name }} does not have any players in top-50 goalscorers
-                </td>
+                <td class="px-1 small"> {{ team_1.name }} </td>
+                <td class="px-1 small"> - </td>
+                <td class="px-1 small"> - </td>
               </tr>
             {%  endif %}
-            <tr class="border border-left-0 border-dark">
-              <td class="px-1 small">
-                {{ team_2.name }}
-              </td>
-            </tr>
             {% if goalscorers_2 %}
-            {% for goalscorer in goalscorers_2 %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small">
-                  {{ goalscorer.player }} is on the {{ goalscorer.position }} position with {{ goalscorer.goals }} goals scored
-                </td>
+                <td class="px-1 small" rowspan="4"> {{ team_2.name }} </td>
               </tr>
-            {% endfor %}
-          {% else %}
-            <tr class="border border-left-0 border-dark">
-              <td class="px-1 small">
-                {{ team_2.name }} does not have any players in top-50 goalscorers
-              </td>
-            </tr>
-          {%  endif %}
+              {% for goalscorer in goalscorers_2 %}
+                <tr>
+                  <td class="px-1 small"> {{ goalscorer.player }} </td>
+                  <td class="px-1 small"> {{ goalscorer.goals }} </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small"> {{ team_2.name }} </td>
+                <td class="px-1 small"> - </td>
+                <td class="px-1 small"> - </td>
+              </tr>
+            {%  endif %}
           </tbody>
         </table>
-        <table class="w-100">
+        <table class="border border-dark w-100">
           <thead class="border-right border-bottom border-dark">
             <tr>
-              <th class="px-1">Rivals <a href="{% url 'assistents-page' %}?team_name={{ team_1.name }}">best assistents of {{ season }} season</a></th>
+              <th class="px-1" colspan="3">Лучшие <a href="{% url 'assistants-page' %}?team_name={{ team_1.name }}">ассистенты сезона {{ season }}</a> в составе команд</th>
+            </tr>
+            <tr class="border border-left-0 border-dark">
+              <th class="px-1 small"> Команда </th>
+              <th class="px-1 small"> Ассистент </th>
+              <th class="px-1 small"> Ассисты </th>
             </tr>
           </thead>
           <tbody>
-            <tr class="border border-left-0 border-dark">
-              <td class="px-1 small">
-                {{ team_1.name }}
-              </td>
-            </tr>
-            {% if assistents_1 %}
-              {% for assistent in assistents_1 %}
-                <tr class="border border-left-0 border-dark">
-                  <td class="px-1 small">
-                    {{ assistent.player }} is on the {{ assistent.position }} position with {{ assistent.assists }} goals scored
-                  </td>
+            {% if assistants_1 %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small" rowspan="4"> {{ team_1.name }} </td>
+              </tr>
+              {% for assistent in assistants_1 %}
+                <tr>
+                  <td class="px-1 small"> {{ assistent.player }} </td>
+                  <td class="px-1 small"> {{ assistent.assists }} </td>
                 </tr>
-              {% endfor %}
+                {% endfor %}
             {% else %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small">
-                  {{ team_1.name }} does not have any players in top-50 assistents
-                </td>
+                <td class="px-1 small"> {{ team_1.name }} </td>
+                <td class="px-1 small"> - </td>
+                <td class="px-1 small"> - </td>
               </tr>
             {%  endif %}
-            <tr class="border border-left-0 border-dark">
-              <td class="px-1 small">
-                {{ team_2.name }}
-              </td>
-            </tr>
-            {% if assistents_2 %}
-            {% for assistent in assistents_2 %}
+            {% if assistants_2 %}
               <tr class="border border-left-0 border-dark">
-                <td class="px-1 small">
-                  {{ assistent.player }} is on the {{ assistent.position }} position with {{ assistent.assists }} goals scored
-                </td>
+                <td class="px-1 small" rowspan="4"> {{ team_2.name }} </td>
               </tr>
-            {% endfor %}
-          {% else %}
-            <tr class="border border-left-0 border-dark">
-              <td class="px-1 small">
-                {{ team_2.name }} does not have any players in top-50 assistents
-              </td>
-            </tr>
-          {%  endif %}
+              {% for assistent in assistants_2 %}
+                <tr>
+                  <td class="px-1 small"> {{ assistent.player }} </td>
+                  <td class="px-1 small"> {{ assistent.assists }} </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+              <tr class="border border-left-0 border-dark">
+                <td class="px-1 small"> {{ team_2.name }} </td>
+                <td class="px-1 small"> - </td>
+                <td class="px-1 small"> - </td>
+              </tr>
+            {%  endif %}
           </tbody>
         </table>
       </div>

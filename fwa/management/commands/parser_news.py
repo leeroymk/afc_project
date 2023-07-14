@@ -4,9 +4,10 @@ import requests
 
 from bs4 import BeautifulSoup
 import lxml
-from django.core.management.base import BaseCommand
-from fwa.management.commands.req_fun import process_timer, selenium_scroller
 from selenium.common.exceptions import TimeoutException
+
+from django.core.management.base import BaseCommand
+from fwa.management.commands.utils import process_timer, selenium_scroller, headers
 
 
 logging_fwa = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class Command(BaseCommand):
         # Получаем список команд лиги и ссылки
         def get_urls_teams_dict(teams_table_site):
             logging_fwa.info('Получаем список команд лиги и ссылки')
-            req = requests.get(teams_table_site)
+            req = requests.get(teams_table_site, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             teams_list = soup.find_all(class_='b-tag-table__content-team')
             # Добавляем ссылки к ключам-названиям команды
@@ -48,7 +49,7 @@ class Command(BaseCommand):
         # Парсим новости АПЛ
         team_counter = 0
         if teams_urls:
-            logging_fwa.info(f'Парсер ищет на {pages_qty} страницах')
+            logging_fwa.info(f'Парсер ищет на {pages_qty+1} страницах')
             logging_fwa.info(f'Таймер ожидания установлен на {timeout_timer} секунд')
             for team_url, team_name in teams_urls.items():
                 team_counter += 1
@@ -59,10 +60,9 @@ class Command(BaseCommand):
                         selenium_scroller(team_url, team_name, pages_qty, timeout_timer)
                         break
                     except TimeoutException as te:
-                        logging_fwa.error(f'Поймали {te}\nПробуем еще раз...')
+                        logging_fwa.error(f'Поймали {te.msg}\nПробуем еще раз...')
                         continue
                 logging_fwa.info(f'Парсинг новостей команды {team_name} завершен!')
         else:
             logging_fwa.error('Что-то пошло не по плану...')
-
         logging_fwa.info('Парсинг новостй успешно завершен!')

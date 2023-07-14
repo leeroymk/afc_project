@@ -1,8 +1,9 @@
-from django.core import management
-from django.core.management.base import BaseCommand
 import logging
 
-from fwa.management.commands.req_fun import process_timer
+from django.core import management
+from django.core.management.base import BaseCommand
+
+from fwa.management.commands.utils import process_timer
 
 
 class Command(BaseCommand):
