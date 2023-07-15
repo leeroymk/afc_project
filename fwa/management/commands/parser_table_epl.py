@@ -33,9 +33,7 @@ class Command(BaseCommand):
             cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY'.format(StatEpl._meta.db_table))
 
             for index, row in table_data.iterrows():
-                team, created = Teams.objects.get_or_create(name=row['Команда'])
-                if created:
-                    logging.info(f"Новая команда {team.name} добавлена в БД.")
+                team = Teams.objects.get(name=row['Команда'])
 
                 StatEpl.objects.create(
                     position=row['Unnamed: 0'],
@@ -47,8 +45,7 @@ class Command(BaseCommand):
                     scored=row['Заб'],
                     conceded=row['Проп'],
                     points=row['О'],
-                    season=season
-                )
+                    season=season)
 
         def year_parser(table_url):
             req = requests.get(table_url, headers=headers)
