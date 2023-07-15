@@ -28,7 +28,6 @@ class Command(BaseCommand):
         timeout_timer = options['timeout_timer']
 
         def next_rival_data(calendar_url):
-            exception_counter = 0
             rival = db_rival_data(calendar_url)
             # Парсим новости и наполняем ДБ по следующему сопернику
             team_url = rival[0]

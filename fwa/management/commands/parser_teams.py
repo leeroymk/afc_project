@@ -24,7 +24,7 @@ class Command(BaseCommand):
         # Получаем список команд лиги и ссылки
         @process_timer
         def get_teams_data(league):
-            logging_fwa.info(f'Наполняем БД клубами {league} и ссылками на их страницы')
+            logging_fwa.info(f'Наполняем БД клубами {league}')
             req = requests.get(league, headers=headers)
             soup = BeautifulSoup(req.text, 'lxml')
             teams_data = soup.find_all(class_='b-tag-table__content-team')
@@ -40,20 +40,19 @@ class Command(BaseCommand):
                 add_league(league_name, team_name)
 
         # Наполняем данные по командам АПЛ
-        teams_table_list = ['https://m.sports.ru/la-liga/table/',
-                            'https://m.sports.ru/ligue-1/table/',
-                            'https://m.sports.ru/bundesliga/table/',
-                            'https://m.sports.ru/seria-a/table/',
-                            'https://m.sports.ru/championship/table/',
-                            'https://m.sports.ru/rfpl/table/',
-                            'https://m.sports.ru/eredivisie/table/',
-                            'https://m.sports.ru/bundesliga-austria/table/',
-                            'https://m.sports.ru/primeira-liga/table/',
-                            'https://m.sports.ru/super-lig/table/',
-                            'https://m.sports.ru/epl/table/'
-                            ]
+        leagues_list = ['https://m.sports.ru/la-liga/table/',
+                        'https://m.sports.ru/ligue-1/table/',
+                        'https://m.sports.ru/bundesliga/table/',
+                        'https://m.sports.ru/seria-a/table/',
+                        'https://m.sports.ru/championship/table/',
+                        'https://m.sports.ru/rfpl/table/',
+                        'https://m.sports.ru/eredivisie/table/',
+                        'https://m.sports.ru/bundesliga-austria/table/',
+                        'https://m.sports.ru/primeira-liga/table/',
+                        'https://m.sports.ru/super-lig/table/',
+                        'https://m.sports.ru/epl/table/']
 
-        for league in teams_table_list:
+        for league in leagues_list:
             get_teams_data(league)
 
         logging_fwa.info('Наполнение БД с данными команд завершено!')
