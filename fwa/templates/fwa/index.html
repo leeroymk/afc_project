@@ -70,7 +70,7 @@
                     </td>
                     <td class="px-1 text-center align-middle small border-left border-dark">
                       {% now "d.m.Y" as today %}
-                      {% if  today == item.date|date:"d.m.y" %}
+                      {% if  today == item.date|date:"d.m.Y" %}
                         {{ item.date|date:"H:i" }}
                       {% else %}
                         {{ item.date|date:"d.m.y" }}
@@ -101,7 +101,7 @@
                     </td>
                     <td class="px-1 text-center align-middle small border-left border-dark">
                       {% now "d.m.Y" as today %}
-                      {% if  today == item.date|date:"d.m.y" %}
+                      {% if  today == item.date|date:"d.m.Y" %}
                         {{ item.date|date:"H:i" }}
                       {% else %}
                         {{ item.date|date:"d.m.y" }}
