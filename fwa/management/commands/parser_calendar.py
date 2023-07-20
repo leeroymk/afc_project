@@ -39,9 +39,7 @@ class Command(BaseCommand):
             calendar_table = src[1].drop(['Unnamed: 5', 'Зрители'], axis=1)
 
             for index, row in calendar_table.iterrows():
-                rival, created = Teams.objects.get_or_create(name=row['Соперник'])
-                if created:
-                    logging.info(f"Новая команда {rival.name} добавлена в БД.")
+                rival = Teams.objects.get(name=row['Соперник'])
 
                 CalendarMatches.objects.create(
                     date_match=datetime.strptime(row['Дата'], '%d.%m.%Y|%H:%M'),
