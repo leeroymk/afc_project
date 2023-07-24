@@ -14,22 +14,26 @@
 </head>
 
 <body>
+  <nav class="navbar navbar-light bg-light sticky-top">
+    <a class="navbar-brand">
+      <img src="https://s5o.ru/storage/simple/ru/edt/26/95/66/92/rue03dfe77c4a.jpeg" width="30" height="30" class="d-inline-block align-top" alt="">
+      AFC Project
+    </a>
+    <form action="/" method="get" class="form-inline">
+      <div style="float: left" class="px-2">
+        <label for="team_name">Выбери команду:</label>
+      </div>
+      <div style="float: left" class="px-2">
+        <select class="form-control form-control-sm" id="team_name" name="team_name" onchange="this.form.submit()">
+          {% for team in teams %}
+            <option {% if team.name == team_1.name %} selected {% endif %}>{{ team.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+    <div class="text-right"><a href="{% url 'calendar-page' %}?team_name={{ team_1.name }}">Календарь</a></div>
+  </nav>
   <div class="container">
-    <div class="row">
-      <form action="/" method="get">
-        <div style="float: left" class="px-2">
-          <label for="team_name">Выбери команду:</label>
-        </div>
-        <div style="float: left" class="px-2">
-          <select class="form-control form-control-sm" id="team_name" name="team_name" onchange="this.form.submit()">
-            {% for team in teams %}
-              <option {% if team.name == team_1.name %} selected {% endif %}>{{ team.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </form>
-      <div class="text-right w-50"><a href="{% url 'calendar-page' %}?team_name={{ team_1.name }}">Календарь</a></div>
-    </div>
     <div class="row border border-dark" style="min-height: 220px;">
       <table class="w-100">
         <thead>
@@ -70,7 +74,7 @@
                     </td>
                     <td class="px-1 text-center align-middle small border-left border-dark">
                       {% now "d.m.Y" as today %}
-                      {% if  today == item.date|date:"d.m.y" %}
+                      {% if  today == item.date|date:"d.m.Y" %}
                         {{ item.date|date:"H:i" }}
                       {% else %}
                         {{ item.date|date:"d.m.y" }}
@@ -101,7 +105,7 @@
                     </td>
                     <td class="px-1 text-center align-middle small border-left border-dark">
                       {% now "d.m.Y" as today %}
-                      {% if  today == item.date|date:"d.m.y" %}
+                      {% if  today == item.date|date:"d.m.Y" %}
                         {{ item.date|date:"H:i" }}
                       {% else %}
                         {{ item.date|date:"d.m.y" }}
