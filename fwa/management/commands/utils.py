@@ -135,7 +135,7 @@ def selenium_scroller(team_url, team_name, pages_qty, timeout_timer):
     chrome_options.add_argument('--headless')
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     browser = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
+        service=Service(ChromeDriverManager(version='114.0.5735.90').install()),
         options=chrome_options)
     browser.set_page_load_timeout(timeout_timer)
     browser.get(team_url)
