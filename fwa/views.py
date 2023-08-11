@@ -50,6 +50,7 @@ def news(request):
         'team_2': team_2,
         'news_1': News.objects.filter(team=team_1).order_by('-date')[:qty],
         'news_2': News.objects.filter(team=team_2).order_by('-date')[:qty],
+        'teams': Teams.objects.filter(league='АПЛ').order_by('name'),
     }
 
     return render(request, 'fwa/news.html', context)
@@ -65,6 +66,7 @@ def stats(request):
         'stats': StatEpl.objects.filter(season=season).order_by('position'),
         'team_1': team_1,
         'team_2': team_2,
+        'teams': Teams.objects.filter(league='АПЛ').order_by('name'),
     }
 
     return render(request, 'fwa/stats.html', context)
@@ -80,6 +82,7 @@ def goalscorers(request):
         'goalscorers': GoalscorersEPL.objects.filter(season=season).order_by('position'),
         'team_1': team_1,
         'team_2': team_2,
+        'teams': Teams.objects.filter(league='АПЛ').order_by('name'),
     }
 
     return render(request, 'fwa/goalscorers.html', context)
@@ -95,6 +98,7 @@ def assistants(request):
         'assistants': AssistantsEPL.objects.filter(season=season).order_by('position'),
         'team_1': team_1,
         'team_2': team_2,
+        'teams': Teams.objects.filter(league='АПЛ').order_by('name'),
     }
 
     return render(request, 'fwa/assistants.html', context)
@@ -110,6 +114,7 @@ def calendar(request):
         'calendar': CalendarMatches.objects.filter(team=team_1, season=season).order_by('date_match'),
         'team_1': team_1,
         'team_2': team_2,
+        'teams': Teams.objects.filter(league='АПЛ').order_by('name'),
     }
 
     return render(request, 'fwa/calendar.html', context)
